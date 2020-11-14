@@ -30,6 +30,7 @@ import java.awt.Shape;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -73,9 +74,6 @@ public class ModelDumperPlugin extends Plugin
 	private final ImmutableList<String> set = ImmutableList.of(
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
-	private final ImmutableList<String> optionSet = ImmutableList.of(
-		"Player", "NPC", "NPC", "Object"
-	);
 
 	@Inject
 	private Client client;
@@ -92,20 +90,33 @@ public class ModelDumperPlugin extends Plugin
 		MenuEntry[] menuEntries = event.getMenuEntries();
 		for (int i = 0; i < set.size(); i++)
 		{
+			boolean addMenuEntry = false;
+			MenuEntry target = null;
 			for (MenuEntry menuEntry : menuEntries)
 			{
-				if (menuEntry.getOption().equals(set.get(i)))
+				if (menuEntry.getOption().toLowerCase().equals("drop") || menuEntry.getOption().toLowerCase().equals("destroy") || menuEntry.getOption().toLowerCase().equals("take"))
 				{
-					String entityName = menuEntry.getTarget();
-					final MenuEntry exportMenuEntry = new MenuEntry();
-					exportMenuEntry.setOption(EXPORT_MODEL);
-					exportMenuEntry.setTarget(entityName);
-					exportMenuEntry.setIdentifier(menuEntry.getIdentifier());
-					exportMenuEntry.setParam1(i);
-					client.setMenuEntries(ArrayUtils.addAll(menuEntries, exportMenuEntry));
-					i = set.size();
-					break;
+					return;
 				}
+				else if (menuEntry.getOption().equals(set.get(i)))
+				{
+					addMenuEntry = true;
+					target = menuEntry;
+				}
+			}
+
+			if (addMenuEntry)
+			{
+				String entityName = target.getTarget();
+				final MenuEntry exportMenuEntry = new MenuEntry();
+				exportMenuEntry.setOption(EXPORT_MODEL);
+				exportMenuEntry.setTarget(entityName);
+				exportMenuEntry.setIdentifier(target.getIdentifier());
+				exportMenuEntry.setParam1(i);
+				client.setMenuEntries(ArrayUtils.addAll(menuEntries, exportMenuEntry));
+				i = set.size();
+				break;
+
 			}
 		}
 	}
@@ -236,14 +247,19 @@ public class ModelDumperPlugin extends Plugin
 			modelData += "f " + x + " " + y + " " + z + "\n";
 			modelData += "" + "\n";
 		}
+		String path = RuneLite.RUNELITE_DIR + "//Models//";
 
-		File output = new File(RuneLite.RUNELITE_DIR + "//Models//" + name);
+		File output = new File(path + name);
+		File outputDir = new File(path);
+		if(!outputDir.exists())
+		{
+			outputDir.mkdirs();
+		}
 		FileWriter writer = new FileWriter(output);
 
 		writer.write(modelData);
 		writer.flush();
 		writer.close();
-
 	}
 
 	@Subscribe
