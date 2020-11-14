@@ -262,6 +262,7 @@ public class ModelDumperPlugin extends Plugin
 		writer.close();
 	}
 
+	//The following code is taken from the Pet Info plugin by Micro Tavor with permission
 	@Subscribe
 	public void onClientTick(ClientTick clientTick)
 	{
