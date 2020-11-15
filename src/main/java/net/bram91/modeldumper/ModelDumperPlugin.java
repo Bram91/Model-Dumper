@@ -63,9 +63,9 @@ import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 
 @PluginDescriptor(
-	name = "Model Dumper",
-	description = "Model Thing",
-	tags = {"Model", "Dumper"},
+	name = "Model Exporter",
+	description = "Allows exporting models by right clicking them.",
+	tags = {"Model", "Dumper","Exporter","3d","obj"},
 	enabledByDefault = false
 )
 public class ModelDumperPlugin extends Plugin
