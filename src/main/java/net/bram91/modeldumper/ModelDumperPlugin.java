@@ -65,8 +65,7 @@ import org.apache.commons.lang3.ArrayUtils;
 @PluginDescriptor(
 	name = "Model Exporter",
 	description = "Allows exporting models by right clicking them.",
-	tags = {"Model", "Dumper","Exporter","3d","obj"},
-	enabledByDefault = false
+	tags = {"Model", "Dumper","Exporter","3d","obj"}
 )
 public class ModelDumperPlugin extends Plugin
 {
