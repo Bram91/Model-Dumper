@@ -52,11 +52,13 @@ import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.ScriptCallbackEvent;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.PluginChanged;
 import net.runelite.client.menus.MenuManager;
+import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
@@ -70,6 +72,11 @@ import org.apache.commons.lang3.ArrayUtils;
 public class ModelDumperPlugin extends Plugin
 {
 	private static final String EXPORT_MODEL = "Export Model";
+	private static final String MENU_TARGET = "Player";
+	private static final WidgetMenuOption FIXED_EQUIPMENT_TAB_EXPORT = new WidgetMenuOption(EXPORT_MODEL,
+		MENU_TARGET, WidgetInfo.FIXED_VIEWPORT_EQUIPMENT_TAB);
+	private static final WidgetMenuOption RESIZABLE_EQUIPMENT_TAB_EXPORT = new WidgetMenuOption(EXPORT_MODEL,
+		MENU_TARGET, WidgetInfo.RESIZABLE_VIEWPORT_EQUIPMENT_TAB);
 	private final ImmutableList<String> set = ImmutableList.of(
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
@@ -83,6 +90,13 @@ public class ModelDumperPlugin extends Plugin
 	@Inject
 	private MenuManager menuManager;
 
+	@Override
+	protected void startUp() throws Exception
+	{
+		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT);
+		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT);
+	}
+
 	@Subscribe
 	public void onMenuOpened(MenuOpened event)
 	{
@@ -93,7 +107,7 @@ public class ModelDumperPlugin extends Plugin
 			MenuEntry target = null;
 			for (MenuEntry menuEntry : menuEntries)
 			{
-				if (menuEntry.getOption().toLowerCase().equals("drop") || menuEntry.getOption().toLowerCase().equals("destroy") || menuEntry.getOption().toLowerCase().equals("take"))
+				if (menuEntry.getOption().toLowerCase().equals("drop") || menuEntry.getOption().toLowerCase().equals("destroy") || menuEntry.getOption().toLowerCase().equals("take") || menuEntry.getOption().toLowerCase().equals("pick-up"))
 				{
 					return;
 				}
@@ -104,7 +118,7 @@ public class ModelDumperPlugin extends Plugin
 				}
 			}
 
-			if (addMenuEntry)
+			if (client.isKeyPressed(KeyCode.KC_SHIFT) && addMenuEntry)
 			{
 				String entityName = target.getTarget();
 				final MenuEntry exportMenuEntry = new MenuEntry();
@@ -112,12 +126,27 @@ public class ModelDumperPlugin extends Plugin
 				exportMenuEntry.setTarget(entityName);
 				exportMenuEntry.setIdentifier(target.getIdentifier());
 				exportMenuEntry.setParam1(i);
-				client.setMenuEntries(ArrayUtils.addAll(menuEntries, exportMenuEntry));
+				addEntry(exportMenuEntry);
 				i = set.size();
 				break;
 
 			}
 		}
+	}
+
+	private void addEntry(MenuEntry exportMenuEntry)
+	{
+		MenuEntry[] oldMenu = client.getMenuEntries();
+		MenuEntry[] newMenu = new MenuEntry[oldMenu.length + 1];
+		for (int i = 0; i < oldMenu.length + 1; i++) {
+			if (i < 1)
+				newMenu[i] = oldMenu[i];
+			else if (i == 1)
+				newMenu[i] = exportMenuEntry;
+			else
+				newMenu[i] = oldMenu[i - 1];
+		}
+		client.setMenuEntries(newMenu);
 	}
 
 	@Subscribe
@@ -127,22 +156,29 @@ public class ModelDumperPlugin extends Plugin
 		{
 			if (event.getMenuOption().equals(EXPORT_MODEL))
 			{
-				switch (event.getWidgetId())
+				if(Text.removeFormattingTags(event.getMenuTarget()).equals(MENU_TARGET))
 				{
-					case 0:
-						exportPlayerModel(event.getMenuTarget());
-						break;
-					case 1:
-						exportNpcModel(event.getMenuTarget(), event.getId());
-						break;
-					case 2:
-						exportNpcModel(event.getMenuTarget(), event.getId());
-						break;
-					case 3:
-						exportObjectModel(event.getMenuTarget(), event.getId());
-						break;
-					case 4:
-						exportPetModel(event.getMenuTarget(),event.getId());
+					exportLocalPlayerModel();
+				}
+				else
+				{
+					switch (event.getWidgetId())
+					{
+						case 0:
+							exportPlayerModel(event.getMenuTarget());
+							break;
+						case 1:
+							exportNpcModel(event.getMenuTarget(), event.getId());
+							break;
+						case 2:
+							exportNpcModel(event.getMenuTarget(), event.getId());
+							break;
+						case 3:
+							exportObjectModel(event.getMenuTarget(), event.getId());
+							break;
+						case 4:
+							exportPetModel(event.getMenuTarget(), event.getId());
+					}
 				}
 			}
 		}
@@ -150,6 +186,12 @@ public class ModelDumperPlugin extends Plugin
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private void exportLocalPlayerModel() throws IOException
+	{
+		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+		export(client.getLocalPlayer().getModel(), "Player " + client.getLocalPlayer().getName() + " " + TIME_FORMAT.format(new Date()) + ".obj");
 	}
 
 	private void exportObjectModel(String menuTarget, int id) throws IOException
@@ -269,7 +311,10 @@ public class ModelDumperPlugin extends Plugin
 		{
 			return;
 		}
-		addMenus();
+		else if(client.isKeyPressed(KeyCode.KC_SHIFT))
+		{
+			addMenus();
+		}
 	}
 
 	private void addMenus()
@@ -288,15 +333,13 @@ public class ModelDumperPlugin extends Plugin
 
 	private void addPetInfoMenu(NPC pet)
 	{
-		final MenuEntry info = new MenuEntry();
-		info.setOption(EXPORT_MODEL);
-		info.setTarget(pet.getName());
-		info.setType(MenuAction.RUNELITE.getId());
-		info.setIdentifier(pet.getId());
-		info.setParam1(4);
-
-		MenuEntry[] newMenu = ObjectArrays.concat(client.getMenuEntries(), info);
-		client.setMenuEntries(newMenu);
+		final MenuEntry exportMenuEntry = new MenuEntry();
+		exportMenuEntry.setOption(EXPORT_MODEL);
+		exportMenuEntry.setTarget(pet.getName());
+		exportMenuEntry.setType(MenuAction.RUNELITE.getId());
+		exportMenuEntry.setIdentifier(pet.getId());
+		exportMenuEntry.setParam1(4);
+		addEntry(exportMenuEntry);
 	}
 
 	private final List<NPC> pets = new ArrayList<>();
