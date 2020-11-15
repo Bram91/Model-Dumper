@@ -247,7 +247,7 @@ public class ModelDumperPlugin extends Plugin
 			modelData += "f " + x + " " + y + " " + z + "\n";
 			modelData += "" + "\n";
 		}
-		String path = RuneLite.RUNELITE_DIR + "//Models//";
+		String path = RuneLite.RUNELITE_DIR + "//models//";
 
 		File output = new File(path + name);
 		File outputDir = new File(path);
