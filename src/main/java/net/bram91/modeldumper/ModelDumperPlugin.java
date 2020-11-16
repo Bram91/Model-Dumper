@@ -77,6 +77,8 @@ public class ModelDumperPlugin extends Plugin
 		MENU_TARGET, WidgetInfo.FIXED_VIEWPORT_EQUIPMENT_TAB);
 	private static final WidgetMenuOption RESIZABLE_EQUIPMENT_TAB_EXPORT = new WidgetMenuOption(EXPORT_MODEL,
 		MENU_TARGET, WidgetInfo.RESIZABLE_VIEWPORT_EQUIPMENT_TAB);
+	private static final WidgetMenuOption RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT = new WidgetMenuOption(EXPORT_MODEL,
+		MENU_TARGET,WidgetInfo.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
 	private final ImmutableList<String> set = ImmutableList.of(
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
@@ -95,6 +97,15 @@ public class ModelDumperPlugin extends Plugin
 	{
 		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT);
 		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT);
+		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT);
+	}
+
+	@Override
+	protected void shutDown()
+	{
+		menuManager.removeManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT);
+		menuManager.removeManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT);
+		menuManager.removeManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT);
 	}
 
 	@Subscribe
