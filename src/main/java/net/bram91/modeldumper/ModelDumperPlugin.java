@@ -25,14 +25,11 @@
 package net.bram91.modeldumper;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ObjectArrays;
+import java.awt.Color;
 import java.awt.Shape;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,26 +40,20 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.runelite.api.*;
 import net.runelite.api.events.ClientTick;
-import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.NpcSpawned;
-import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.events.PluginChanged;
 import net.runelite.client.menus.MenuManager;
 import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
-import org.apache.commons.lang3.ArrayUtils;
 
 @PluginDescriptor(
 	name = "Model Exporter",
@@ -201,6 +192,10 @@ public class ModelDumperPlugin extends Plugin
 
 	private void exportLocalPlayerModel() throws IOException
 	{
+		client.getLocalPlayer().setAnimation(-1);
+		client.getLocalPlayer().setIdlePoseAnimation(-1);
+		client.getLocalPlayer().setPoseAnimation(-1);
+		client.getLocalPlayer().setActionFrame(-1);
 		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		export(client.getLocalPlayer().getModel(), "Player " + client.getLocalPlayer().getName() + " " + TIME_FORMAT.format(new Date()) + ".obj");
 	}
@@ -279,8 +274,15 @@ public class ModelDumperPlugin extends Plugin
 
 	public void export(Model model, String name) throws IOException
 	{
-		String modelData = "mtllib none.mtl";
-		modelData += "o " + name + "\n";
+		name = name.replace(" ", "_");
+		String modelData = "mtllib " + name.replace(".obj", ".mtl");
+		String materialData = "";
+		modelData += "\no " + name + "\n";
+
+
+		final int[] color1s = model.getFaceColors1();
+		final int[] color2s = model.getFaceColors2();
+		final int[] color3s = model.getFaceColors3();
 
 		for (int i = 0; i < model.getVerticesCount(); ++i)
 		{
@@ -289,29 +291,57 @@ public class ModelDumperPlugin extends Plugin
 				+ model.getVerticesZ()[i] * -1 + "\n";
 		}
 
-		for (int i = 0; i < model.getTrianglesCount(); ++i)
+		for (int face = 0; face < model.getTrianglesCount(); ++face)
 		{
-			int x = model.getTrianglesX()[i] + 1;
-			int y = model.getTrianglesY()[i] + 1;
-			int z = model.getTrianglesZ()[i] + 1;
+			int x = model.getTrianglesX()[face] + 1;
+			int y = model.getTrianglesY()[face] + 1;
+			int z = model.getTrianglesZ()[face] + 1;
 
-			modelData += "usemtl m" + i + "\n";
+			Color color1 = rs2hslToColor(color1s[face]);
+			Color color2 = rs2hslToColor(color2s[face]);
+			Color color3 = rs2hslToColor(color3s[face]);
+			double r = color1.getRed() / 255.0 + color2.getRed() / 255.0 + color3.getRed() / 255.0;
+			double g = color1.getGreen() / 255.0 + color2.getGreen() / 255.0 + color3.getGreen() / 255.0;
+			double b = color1.getBlue() / 255.0 + color2.getBlue() / 255.0 + color3.getBlue() / 255.0;
+
+			materialData += "newmtl m" + face + "\n";
+			materialData += String.format("Kd %.4f %.4f %.4f\n", r, g, b);
+
+			modelData += "usemtl m" + face + "\n";
 			modelData += "f " + x + " " + y + " " + z + "\n";
 			modelData += "" + "\n";
 		}
-		String path = RuneLite.RUNELITE_DIR + "//models//";
 
-		File output = new File(path + name);
+		String path = RuneLite.RUNELITE_DIR + "//models//";
 		File outputDir = new File(path);
 		if(!outputDir.exists())
 		{
 			outputDir.mkdirs();
 		}
-		FileWriter writer = new FileWriter(output);
 
-		writer.write(modelData);
-		writer.flush();
-		writer.close();
+		File modelOutput = new File(path + name);
+		FileWriter modelWriter = new FileWriter(modelOutput);
+		modelWriter.write(modelData);
+		modelWriter.flush();
+		modelWriter.close();
+
+		File materialOutput = new File(path + name.replace(".obj", ".mtl"));
+		FileWriter materialWriter = new FileWriter(materialOutput);
+		materialWriter.write(materialData);
+		materialWriter.flush();
+		materialWriter.close();
+	}
+
+
+	private static Color rs2hslToColor(int hsl)
+	{
+		float hue = (hsl >> 10 & 63) / 63f;
+		float saturation = (hsl >> 7 & 7) / 7f;
+		float lightness = (hsl & 127) / 127f;
+
+		float brightness = lightness < 0.5 ? lightness * (1 + saturation) : lightness * (1 - saturation) + saturation;
+		float adjustedSaturation = 2 * (1 - lightness / brightness);
+		return new Color(Color.HSBtoRGB(hue, adjustedSaturation, brightness));
 	}
 
 	//The following code is taken from the Pet Info plugin by Micro Tavor with permission
