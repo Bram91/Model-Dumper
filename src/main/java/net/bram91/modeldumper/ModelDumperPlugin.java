@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2020, Bram91
+ * Copyright (c) 2020, Unmoon <https://github.com/Unmoon>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -297,9 +298,9 @@ public class ModelDumperPlugin extends Plugin
 			int y = model.getTrianglesY()[face] + 1;
 			int z = model.getTrianglesZ()[face] + 1;
 
-			Color color1 = rs2hslToColor(color1s[face]);
-			Color color2 = rs2hslToColor(color2s[face]);
-			Color color3 = rs2hslToColor(color3s[face]);
+			Color color1 = new Color(JagexColor.HSLtoRGB((short)color1s[face], JagexColor.BRIGTHNESS_MIN));
+			Color color2 = new Color(JagexColor.HSLtoRGB((short)color2s[face], JagexColor.BRIGTHNESS_MIN));
+			Color color3 = new Color(JagexColor.HSLtoRGB((short)color3s[face], JagexColor.BRIGTHNESS_MIN));
 			double r = color1.getRed() / 255.0 + color2.getRed() / 255.0 + color3.getRed() / 255.0;
 			double g = color1.getGreen() / 255.0 + color2.getGreen() / 255.0 + color3.getGreen() / 255.0;
 			double b = color1.getBlue() / 255.0 + color2.getBlue() / 255.0 + color3.getBlue() / 255.0;
