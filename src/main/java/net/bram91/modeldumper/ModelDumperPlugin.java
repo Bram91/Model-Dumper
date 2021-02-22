@@ -26,6 +26,7 @@
 package net.bram91.modeldumper;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Provides;
 import java.awt.Color;
 import java.awt.Shape;
 import java.io.File;
@@ -49,6 +50,7 @@ import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.menus.MenuManager;
 import net.runelite.client.menus.WidgetMenuOption;
@@ -83,6 +85,15 @@ public class ModelDumperPlugin extends Plugin
 
 	@Inject
 	private MenuManager menuManager;
+
+	@Inject
+	private ModelDumperPluginConfig config;
+
+	@Provides
+	ModelDumperPluginConfig getConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(ModelDumperPluginConfig.class);
+	}
 
 	@Override
 	protected void startUp() throws Exception
@@ -193,10 +204,6 @@ public class ModelDumperPlugin extends Plugin
 
 	private void exportLocalPlayerModel() throws IOException
 	{
-		client.getLocalPlayer().setAnimation(-1);
-		client.getLocalPlayer().setIdlePoseAnimation(-1);
-		client.getLocalPlayer().setPoseAnimation(-1);
-		client.getLocalPlayer().setActionFrame(-1);
 		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		export(client.getLocalPlayer().getModel(), "Player " + client.getLocalPlayer().getName() + " " + TIME_FORMAT.format(new Date()) + ".obj");
 	}
@@ -326,11 +333,14 @@ public class ModelDumperPlugin extends Plugin
 		modelWriter.flush();
 		modelWriter.close();
 
-		File materialOutput = new File(path + name.replace(".obj", ".mtl"));
-		FileWriter materialWriter = new FileWriter(materialOutput);
-		materialWriter.write(materialData);
-		materialWriter.flush();
-		materialWriter.close();
+		if(config.material())
+		{
+			File materialOutput = new File(path + name.replace(".obj", ".mtl"));
+			FileWriter materialWriter = new FileWriter(materialOutput);
+			materialWriter.write(materialData);
+			materialWriter.flush();
+			materialWriter.close();
+		}
 	}
 
 
