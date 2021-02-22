@@ -343,18 +343,6 @@ public class ModelDumperPlugin extends Plugin
 		}
 	}
 
-
-	private static Color rs2hslToColor(int hsl)
-	{
-		float hue = (hsl >> 10 & 63) / 63f;
-		float saturation = (hsl >> 7 & 7) / 7f;
-		float lightness = (hsl & 127) / 127f;
-
-		float brightness = lightness < 0.5 ? lightness * (1 + saturation) : lightness * (1 - saturation) + saturation;
-		float adjustedSaturation = 2 * (1 - lightness / brightness);
-		return new Color(Color.HSBtoRGB(hue, adjustedSaturation, brightness));
-	}
-
 	//The following code is taken from the Pet Info plugin by Micro Tavor with permission
 	@Subscribe
 	public void onClientTick(ClientTick clientTick)
