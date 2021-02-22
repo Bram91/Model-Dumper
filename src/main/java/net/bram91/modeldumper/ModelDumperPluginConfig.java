@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2020, Bram91
- * Copyright (c) 2020, Unmoon <https://github.com/Unmoon>
+ * Copyright (c) 2021, Bram91
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
