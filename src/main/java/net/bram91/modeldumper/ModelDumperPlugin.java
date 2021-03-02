@@ -308,9 +308,9 @@ public class ModelDumperPlugin extends Plugin
 			Color color1 = new Color(JagexColor.HSLtoRGB((short)color1s[face], JagexColor.BRIGTHNESS_MIN));
 			Color color2 = new Color(JagexColor.HSLtoRGB((short)color2s[face], JagexColor.BRIGTHNESS_MIN));
 			Color color3 = new Color(JagexColor.HSLtoRGB((short)color3s[face], JagexColor.BRIGTHNESS_MIN));
-			double r = color1.getRed() / 255.0 + color2.getRed() / 255.0 + color3.getRed() / 255.0;
-			double g = color1.getGreen() / 255.0 + color2.getGreen() / 255.0 + color3.getGreen() / 255.0;
-			double b = color1.getBlue() / 255.0 + color2.getBlue() / 255.0 + color3.getBlue() / 255.0;
+			double r = (color1.getRed() / 255.0 + color2.getRed() / 255.0 + color3.getRed() / 255.0) / 3;
+			double g = (color1.getGreen() / 255.0 + color2.getGreen() / 255.0 + color3.getGreen() / 255.0) / 3;
+			double b = (color1.getBlue() / 255.0 + color2.getBlue() / 255.0 + color3.getBlue() / 255.0) / 3;
 
 			materialData += "newmtl m" + face + "\n";
 			materialData += String.format("Kd %.4f %.4f %.4f\n", r, g, b);
