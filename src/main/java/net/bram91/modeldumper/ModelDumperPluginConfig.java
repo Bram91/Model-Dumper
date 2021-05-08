@@ -41,4 +41,12 @@ public interface ModelDumperPluginConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+			keyName = "material",
+			name = "Force Rest Pose (Local Player)",
+			description = "Forces local player to perform an animation on export. The resulting model is in a rest pose.",
+			position = 2
+	)
+	default boolean forceRestPose() { return false; }
 }

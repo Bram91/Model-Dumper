@@ -204,8 +204,14 @@ public class ModelDumperPlugin extends Plugin
 
 	private void exportLocalPlayerModel() throws IOException
 	{
+		Player localPlayer = client.getLocalPlayer();
+		if (config.forceRestPose())
+		{
+			localPlayer.setAnimation(2566);
+			localPlayer.setActionFrame(0);
+		}
 		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-		export(client.getLocalPlayer().getModel(), "Player " + client.getLocalPlayer().getName() + " " + TIME_FORMAT.format(new Date()) + ".obj");
+		export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName() + " " + TIME_FORMAT.format(new Date()) + ".obj");
 	}
 
 	private void exportObjectModel(String menuTarget, int id) throws IOException
