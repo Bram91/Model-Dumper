@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.inject.Provides;
 
-import lombok.Getter;
 import java.awt.Color;
 import java.awt.Shape;
 import java.io.File;
@@ -106,7 +105,6 @@ public class ModelDumperPlugin extends Plugin
 		return configManager.getConfig(ModelDumperPluginConfig.class);
 	}
 
-	@Getter
 	private final Table<WorldPoint, Integer, GroundItem> groundItems = HashBasedTable.create();
 
 	@Override
