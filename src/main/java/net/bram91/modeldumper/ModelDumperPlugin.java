@@ -393,6 +393,7 @@ public class ModelDumperPlugin extends Plugin
 			.id(item.getId())
 			.item(item)
 			.location(tile.getWorldLocation())
+			.quantity(item.getQuantity())
 			.build();
 
 		GroundItem existing = groundItems.get(tile.getWorldLocation(), item.getId());
