@@ -25,8 +25,11 @@
  */
 package net.bram91.modeldumper;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Table;
 import com.google.inject.Provides;
+
 import java.awt.Color;
 import java.awt.Shape;
 import java.io.File;
@@ -35,7 +38,9 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,7 +48,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import net.runelite.api.*;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.ItemDespawned;
+import net.runelite.api.events.ItemQuantityChanged;
+import net.runelite.api.events.ItemSpawned;
 import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.NpcSpawned;
@@ -95,6 +105,8 @@ public class ModelDumperPlugin extends Plugin
 		return configManager.getConfig(ModelDumperPluginConfig.class);
 	}
 
+	private final Table<WorldPoint, Integer, GroundItem> groundItems = HashBasedTable.create();
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -109,6 +121,7 @@ public class ModelDumperPlugin extends Plugin
 		menuManager.removeManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT);
 		menuManager.removeManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT);
 		menuManager.removeManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT);
+		groundItems.clear();
 	}
 
 	@Subscribe
@@ -121,7 +134,7 @@ public class ModelDumperPlugin extends Plugin
 			MenuEntry target = null;
 			for (MenuEntry menuEntry : menuEntries)
 			{
-				if (menuEntry.getOption().toLowerCase().equals("drop") || menuEntry.getOption().toLowerCase().equals("destroy") || menuEntry.getOption().toLowerCase().equals("take") || menuEntry.getOption().toLowerCase().equals("pick-up"))
+				if (menuEntry.getOption().toLowerCase().equals("drop") || menuEntry.getOption().toLowerCase().equals("destroy"))
 				{
 					return;
 				}
@@ -228,6 +241,8 @@ public class ModelDumperPlugin extends Plugin
 				if (tile != null)
 				{
 					GameObject[] gameObjects = tile.getGameObjects();
+					Collection<GroundItem> groundItemsOnTile = groundItems.row(tile.getWorldLocation()).values();
+
 					for (int i = 0; i < gameObjects.length; i++)
 					{
 						if (gameObjects[i] != null && gameObjects[i].getId() == id)
@@ -237,6 +252,15 @@ public class ModelDumperPlugin extends Plugin
 								DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 								export((Model) gameObjects[i].getRenderable(), "Object " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
 							}
+						}
+					}
+
+					for (Iterator<GroundItem> iterator = groundItemsOnTile.iterator(); iterator.hasNext();) {
+						GroundItem groundItem = iterator.next();
+
+						if (groundItem.getId() == id) {
+							DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+							export((Model) groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
 						}
 					}
 				}
@@ -346,6 +370,80 @@ public class ModelDumperPlugin extends Plugin
 			materialWriter.write(materialData);
 			materialWriter.flush();
 			materialWriter.close();
+		}
+	}
+
+	@Subscribe
+	public void onGameStateChanged(final GameStateChanged event)
+	{
+		if (event.getGameState() == GameState.LOADING)
+		{
+			groundItems.clear();
+		}
+	}
+
+	// borrowed from official Ground Items plugin
+	@Subscribe
+	public void onItemSpawned(ItemSpawned itemSpawned)
+	{
+		TileItem item = itemSpawned.getItem();
+		Tile tile = itemSpawned.getTile();
+
+		final GroundItem groundItem = GroundItem.builder()
+			.id(item.getId())
+			.item(item)
+			.location(tile.getWorldLocation())
+			.quantity(item.getQuantity())
+			.build();
+
+		GroundItem existing = groundItems.get(tile.getWorldLocation(), item.getId());
+		if (existing != null)
+		{
+			existing.setQuantity(existing.getQuantity() + groundItem.getQuantity());
+		}
+		else
+		{
+			groundItems.put(tile.getWorldLocation(), item.getId(), groundItem);
+		}
+	}
+
+	// borrowed from official Ground Items plugin
+	@Subscribe
+	public void onItemDespawned(ItemDespawned itemDespawned)
+	{
+		TileItem item = itemDespawned.getItem();
+		Tile tile = itemDespawned.getTile();
+
+		GroundItem groundItem = groundItems.get(tile.getWorldLocation(), item.getId());
+		if (groundItem == null)
+		{
+			return;
+		}
+
+		if (groundItem.getQuantity() <= item.getQuantity())
+		{
+			groundItems.remove(tile.getWorldLocation(), item.getId());
+		}
+		else
+		{
+			groundItem.setQuantity(groundItem.getQuantity() - item.getQuantity());
+		}
+	}
+
+	// borrowed from official Ground Items plugin
+	@Subscribe
+	public void onItemQuantityChanged(ItemQuantityChanged itemQuantityChanged)
+	{
+		TileItem item = itemQuantityChanged.getItem();
+		Tile tile = itemQuantityChanged.getTile();
+		int oldQuantity = itemQuantityChanged.getOldQuantity();
+		int newQuantity = itemQuantityChanged.getNewQuantity();
+
+		int diff = newQuantity - oldQuantity;
+		GroundItem groundItem = groundItems.get(tile.getWorldLocation(), item.getId());
+		if (groundItem != null)
+		{
+			groundItem.setQuantity(groundItem.getQuantity() + diff);
 		}
 	}
 
