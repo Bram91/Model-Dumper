@@ -250,7 +250,7 @@ public class ModelDumperPlugin extends Plugin
 							if (gameObjects[i].getRenderable() != null)
 							{
 								DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-								export((Model) gameObjects[i].getRenderable(), "Object " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
+								export(gameObjects[i].getRenderable().getModel(), "Object " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
 							}
 						}
 					}
@@ -260,7 +260,7 @@ public class ModelDumperPlugin extends Plugin
 
 						if (groundItem.getId() == id) {
 							DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-							export((Model) groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
+							export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
 						}
 					}
 				}
