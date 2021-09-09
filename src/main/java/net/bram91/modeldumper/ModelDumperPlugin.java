@@ -195,8 +195,6 @@ public class ModelDumperPlugin extends Plugin
 							exportPlayerModel(event.getMenuTarget());
 							break;
 						case 1:
-							exportNpcModel(event.getMenuTarget(), event.getId());
-							break;
 						case 2:
 							exportNpcModel(event.getMenuTarget(), event.getId());
 							break;
@@ -241,26 +239,40 @@ public class ModelDumperPlugin extends Plugin
 				if (tile != null)
 				{
 					GameObject[] gameObjects = tile.getGameObjects();
+					WallObject wallObject = tile.getWallObject();
 					Collection<GroundItem> groundItemsOnTile = groundItems.row(tile.getWorldLocation()).values();
 
-					for (int i = 0; i < gameObjects.length; i++)
+					if(wallObject != null && wallObject.getId() == id)
 					{
-						if (gameObjects[i] != null && gameObjects[i].getId() == id)
+						DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+						export((Model) wallObject.getRenderable1(), "Object " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
+						return;
+					}
+					else
+					{
+						for (int i = 0; i < gameObjects.length; i++)
 						{
-							if (gameObjects[i].getRenderable() != null)
+							if (gameObjects[i] != null && gameObjects[i].getId() == id)
 							{
-								DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-								export(gameObjects[i].getRenderable().getModel(), "Object " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
+								if (gameObjects[i].getRenderable() != null)
+								{
+									DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+									export((Model) gameObjects[i].getRenderable(), "Object " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
+									return;
+								}
 							}
 						}
-					}
 
-					for (Iterator<GroundItem> iterator = groundItemsOnTile.iterator(); iterator.hasNext();) {
-						GroundItem groundItem = iterator.next();
+						for (Iterator<GroundItem> iterator = groundItemsOnTile.iterator(); iterator.hasNext(); )
+						{
+							GroundItem groundItem = iterator.next();
 
-						if (groundItem.getId() == id) {
-							DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-							export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
+							if (groundItem.getId() == id)
+							{
+								DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+								export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
+								return;
+							}
 						}
 					}
 				}
