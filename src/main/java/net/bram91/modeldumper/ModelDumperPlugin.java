@@ -110,9 +110,9 @@ public class ModelDumperPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT);
-		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT);
-		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT);
+		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
+		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
+		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT,this::exportLocalPlayerModel);
 	}
 
 	@Override
@@ -148,85 +148,53 @@ public class ModelDumperPlugin extends Plugin
 			if (client.isKeyPressed(KeyCode.KC_SHIFT) && addMenuEntry)
 			{
 				String entityName = target.getTarget();
-				final MenuEntry exportMenuEntry = new MenuEntry();
-				exportMenuEntry.setOption(EXPORT_MODEL);
-				exportMenuEntry.setTarget(entityName);
-				exportMenuEntry.setIdentifier(target.getIdentifier());
-				exportMenuEntry.setParam1(i);
-				addEntry(exportMenuEntry);
-				i = set.size();
+
+				if(target.getOption().equals("Trade with"))
+				{
+					client.createMenuEntry(0)
+						.setOption(EXPORT_MODEL)
+						.setTarget(entityName)
+						.setIdentifier(target.getIdentifier())
+						.onClick(this::exportPlayerModel);
+				}
+				else if(target.getType().equals(MenuAction.EXAMINE_OBJECT))
+				{
+					client.createMenuEntry(0)
+						.setOption(EXPORT_MODEL)
+						.setTarget(entityName)
+						.setIdentifier(target.getIdentifier())
+						.onClick(this::exportObjectModel);
+				}
+				else if(target.getType().equals(MenuAction.NPC_FIRST_OPTION)||target.getType().equals(MenuAction.NPC_SECOND_OPTION)||target.getType().equals(MenuAction.NPC_THIRD_OPTION))
+				{
+					client.createMenuEntry(0)
+						.setOption(EXPORT_MODEL)
+						.setTarget(entityName)
+						.setIdentifier(target.getIdentifier())
+						.onClick(this::exportNpcModel);
+				}
 				break;
 
 			}
 		}
 	}
 
-	private void addEntry(MenuEntry exportMenuEntry)
-	{
-		MenuEntry[] oldMenu = client.getMenuEntries();
-		MenuEntry[] newMenu = new MenuEntry[oldMenu.length + 1];
-		for (int i = 0; i < oldMenu.length + 1; i++) {
-			if (i < 1)
-				newMenu[i] = oldMenu[i];
-			else if (i == 1)
-				newMenu[i] = exportMenuEntry;
-			else
-				newMenu[i] = oldMenu[i - 1];
-		}
-		client.setMenuEntries(newMenu);
-	}
-
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		try
-		{
-			if (event.getMenuOption().equals(EXPORT_MODEL))
-			{
-				if(Text.removeFormattingTags(event.getMenuTarget()).equals(MENU_TARGET))
-				{
-					exportLocalPlayerModel();
-				}
-				else
-				{
-					switch (event.getWidgetId())
-					{
-						case 0:
-							exportPlayerModel(event.getMenuTarget());
-							break;
-						case 1:
-						case 2:
-							exportNpcModel(event.getMenuTarget(), event.getId());
-							break;
-						case 3:
-							exportObjectModel(event.getMenuTarget(), event.getId());
-							break;
-						case 4:
-							exportPetModel(event.getMenuTarget(), event.getId());
-					}
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	private void exportLocalPlayerModel() throws IOException
+	private void exportLocalPlayerModel(MenuEntry entry)
 	{
 		Player localPlayer = client.getLocalPlayer();
 		if (config.forceRestPose())
 		{
-			localPlayer.setAnimation(2566);
+		//	localPlayer.setAnimation(2566);
 			localPlayer.setActionFrame(0);
 		}
 		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName() + " " + TIME_FORMAT.format(new Date()) + ".obj");
 	}
 
-	private void exportObjectModel(String menuTarget, int id) throws IOException
+	private void exportObjectModel(MenuEntry entry)
 	{
+		int id = entry.getIdentifier();
+		String menuTarget = entry.getTarget();
 		Scene scene = client.getScene();
 		Tile[][][] tiles = scene.getTiles();
 
@@ -280,14 +248,16 @@ public class ModelDumperPlugin extends Plugin
 		}
 	}
 
-	private void exportNpcModel(String menuTarget, int identifier) throws IOException
+	private void exportNpcModel(MenuEntry entry)
 	{
+		String menuTarget = entry.getTarget();
+		int identifier = entry.getIdentifier();
 		NPC npc = client.getCachedNPCs()[identifier];
 		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()) + ".obj");
 	}
 
-	private void exportPetModel(String menuTarget, int identifier) throws IOException
+	private void exportPetModel(String menuTarget, int identifier)
 	{
 		NPC npc=null;
 		for(NPC npC:client.getNpcs())
@@ -305,8 +275,9 @@ public class ModelDumperPlugin extends Plugin
 		}
 	}
 
-	private void exportPlayerModel(String menuTarget) throws IOException
+	private void exportPlayerModel(MenuEntry entry)
 	{
+		String menuTarget = entry.getTarget();
 		Pattern REMOVE_TAGS_SECONDARY = Pattern.compile("\\(.+?\\)");
 		Matcher m = REMOVE_TAGS_SECONDARY.matcher(menuTarget);
 		String trgt = m.replaceAll("");
@@ -322,7 +293,7 @@ public class ModelDumperPlugin extends Plugin
 		}
 	}
 
-	public void export(Model model, String name) throws IOException
+	public void export(Model model, String name)
 	{
 		name = name.replace(" ", "_");
 		String modelData = "mtllib " + name.replace(".obj", ".mtl");
@@ -341,11 +312,11 @@ public class ModelDumperPlugin extends Plugin
 				+ model.getVerticesZ()[i] * -1 + "\n";
 		}
 
-		for (int face = 0; face < model.getTrianglesCount(); ++face)
+		for (int face = 0; face < model.getFaceCount(); ++face)
 		{
-			int x = model.getTrianglesX()[face] + 1;
-			int y = model.getTrianglesY()[face] + 1;
-			int z = model.getTrianglesZ()[face] + 1;
+			int x = model.getFaceIndices1()[face] + 1;
+			int y = model.getFaceIndices2()[face] + 1;
+			int z = model.getFaceIndices3()[face] + 1;
 
 			Color color1 = new Color(JagexColor.HSLtoRGB((short)color1s[face], JagexColor.BRIGTHNESS_MIN));
 			Color color2 = new Color(JagexColor.HSLtoRGB((short)color2s[face], JagexColor.BRIGTHNESS_MIN));
@@ -361,27 +332,33 @@ public class ModelDumperPlugin extends Plugin
 			modelData += "f " + x + " " + y + " " + z + "\n";
 			modelData += "" + "\n";
 		}
-
-		String path = RuneLite.RUNELITE_DIR + "//models//";
-		File outputDir = new File(path);
-		if(!outputDir.exists())
+		try
 		{
-			outputDir.mkdirs();
+			String path = RuneLite.RUNELITE_DIR + "//models//";
+			File outputDir = new File(path);
+			if (!outputDir.exists())
+			{
+				outputDir.mkdirs();
+			}
+
+			File modelOutput = new File(path + name);
+			FileWriter modelWriter = new FileWriter(modelOutput);
+			modelWriter.write(modelData);
+			modelWriter.flush();
+			modelWriter.close();
+
+			if (config.material())
+			{
+				File materialOutput = new File(path + name.replace(".obj", ".mtl"));
+				FileWriter materialWriter = new FileWriter(materialOutput);
+				materialWriter.write(materialData);
+				materialWriter.flush();
+				materialWriter.close();
+			}
 		}
-
-		File modelOutput = new File(path + name);
-		FileWriter modelWriter = new FileWriter(modelOutput);
-		modelWriter.write(modelData);
-		modelWriter.flush();
-		modelWriter.close();
-
-		if(config.material())
+		catch(IOException exception)
 		{
-			File materialOutput = new File(path + name.replace(".obj", ".mtl"));
-			FileWriter materialWriter = new FileWriter(materialOutput);
-			materialWriter.write(materialData);
-			materialWriter.flush();
-			materialWriter.close();
+			//failed to write
 		}
 	}
 
@@ -489,13 +466,13 @@ public class ModelDumperPlugin extends Plugin
 
 	private void addPetInfoMenu(NPC pet)
 	{
-		final MenuEntry exportMenuEntry = new MenuEntry();
+		/*final MenuEntry exportMenuEntry = new MenuEntry();
 		exportMenuEntry.setOption(EXPORT_MODEL);
 		exportMenuEntry.setTarget(pet.getName());
 		exportMenuEntry.setType(MenuAction.RUNELITE.getId());
 		exportMenuEntry.setIdentifier(pet.getId());
 		exportMenuEntry.setParam1(4);
-		addEntry(exportMenuEntry);
+		addEntry(exportMenuEntry);*/
 	}
 
 	private final List<NPC> pets = new ArrayList<>();
