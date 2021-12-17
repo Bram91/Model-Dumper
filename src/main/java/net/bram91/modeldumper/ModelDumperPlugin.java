@@ -184,8 +184,8 @@ public class ModelDumperPlugin extends Plugin
 		Player localPlayer = client.getLocalPlayer();
 		if (config.forceRestPose())
 		{
-		//	localPlayer.setAnimation(2566);
-			localPlayer.setActionFrame(0);
+			localPlayer.setAnimation(2566);
+			localPlayer.setAnimationFrame(0);
 		}
 		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName() + " " + TIME_FORMAT.format(new Date()) + ".obj");
