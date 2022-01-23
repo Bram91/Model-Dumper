@@ -86,6 +86,7 @@ public class ModelDumperPlugin extends Plugin
 	private final ImmutableList<String> set = ImmutableList.of(
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
+	private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
 	@Inject
 	private Client client;
@@ -194,6 +195,8 @@ public class ModelDumperPlugin extends Plugin
 
 	private void exportObjectModel(MenuEntry entry)
 	{
+		String timestamp = TIME_FORMAT.format(new Date());
+
 		int id = entry.getIdentifier();
 		String menuTarget = entry.getTarget();
 		Scene scene = client.getScene();
@@ -210,36 +213,35 @@ public class ModelDumperPlugin extends Plugin
 					GameObject[] gameObjects = tile.getGameObjects();
 					WallObject wallObject = tile.getWallObject();
 					Collection<GroundItem> groundItemsOnTile = groundItems.row(tile.getWorldLocation()).values();
+					DecorativeObject decoration = tile.getDecorativeObject();
 
-					if(wallObject != null && wallObject.getId() == id)
+					if (wallObject != null && wallObject.getId() == id)
 					{
-						DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-						OBJExporter.export(wallObject.getRenderable1(), "Object " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()));
+
+						OBJExporter.export(wallObject.getRenderable1(), "Object " + Text.removeFormattingTags(menuTarget) + " " + timestamp);
+						return;
+					}
+					else if (decoration != null && decoration.getId() == id)
+					{
+						OBJExporter.export(decoration.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget) + " " + timestamp);
 						return;
 					}
 					else
 					{
-						for (int i = 0; i < gameObjects.length; i++)
-						{
-							if (gameObjects[i] != null && gameObjects[i].getId() == id)
-							{
-								if (gameObjects[i].getRenderable() != null)
-								{
+						for (GameObject gameObject : gameObjects) {
+							if (gameObject != null && gameObject.getId() == id) {
+								if (gameObject.getRenderable() != null) {
 									DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-									OBJExporter.export(gameObjects[i].getRenderable(), "Object " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()));
+									OBJExporter.export(gameObject.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget) + " " + timestamp);
 									return;
 								}
 							}
 						}
 
-						for (Iterator<GroundItem> iterator = groundItemsOnTile.iterator(); iterator.hasNext(); )
-						{
-							GroundItem groundItem = iterator.next();
-
-							if (groundItem.getId() == id)
-							{
+						for (GroundItem groundItem : groundItemsOnTile) {
+							if (groundItem.getId() == id) {
 								DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-								OBJExporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()));
+								OBJExporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget) + " " + timestamp);
 								return;
 							}
 						}
@@ -254,7 +256,6 @@ public class ModelDumperPlugin extends Plugin
 		String menuTarget = entry.getTarget();
 		int identifier = entry.getIdentifier();
 		NPC npc = client.getCachedNPCs()[identifier];
-		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		OBJExporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()));
 	}
 
@@ -269,7 +270,6 @@ public class ModelDumperPlugin extends Plugin
 			}
 		}
 
-		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		if(npc!=null)
 		{
 			OBJExporter.export(npc.getModel(), "Pet " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()));
@@ -288,7 +288,6 @@ public class ModelDumperPlugin extends Plugin
 		{
 			if (client.getPlayers().get(i).getName().equals(trgt))
 			{
-				DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 				OBJExporter.export(client.getPlayers().get(i).getModel(), "Player " + trgt + " " + TIME_FORMAT.format(new Date()));
 			}
 		}
