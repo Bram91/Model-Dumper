@@ -13,35 +13,7 @@ import java.util.List;
 public class OBJExporter
 {
 
-    private final static String PATH = RuneLite.RUNELITE_DIR + "//models//";
-
-    public static void export(Renderable r, String name)
-    {
-        Model m;
-        if (r instanceof Model)
-        {
-            m = (Model) r;
-        }
-        else
-        {
-            m = r.getModel();
-        }
-
-        export(m, name);
-    }
-
-    public static void export(Model m, String name)
-    {
-        try
-        {
-            exportModel(m, name);
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private static void exportModel(Model m, String name) throws FileNotFoundException
+    public static void export(Model m, String name) throws FileNotFoundException
     {
         if (m == null)
             return;
@@ -49,8 +21,8 @@ public class OBJExporter
         name = name.replace(" ", "_");
 
         // Open writers
-        PrintWriter obj = new PrintWriter(PATH + name + ".obj");
-        PrintWriter mtl = new PrintWriter(PATH + name + ".mtl");
+        PrintWriter obj = new PrintWriter(name + ".obj");
+        PrintWriter mtl = new PrintWriter(name + ".mtl");
         obj.println("# Made by RuneLite Model-Dumper Plugin");
         obj.println("o " + name);
 

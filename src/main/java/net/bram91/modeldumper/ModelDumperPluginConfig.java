@@ -49,4 +49,12 @@ public interface ModelDumperPluginConfig extends Config
 			position = 2
 	)
 	default boolean forceRestPose() { return false; }
+
+	@ConfigItem(
+			keyName="exportFormat",
+			name = "Export Format",
+			description="Select which 3d model file format to export to. OBJ uses averaged face colors while PLY uses vertex colors.",
+			position = 3
+	)
+	default ExportFormat exportFormat() { return ExportFormat.OBJ; }
 }
