@@ -32,17 +32,17 @@ public class STLExporter {
 
             // vertex 1
             w.write(le((float) m.getVerticesX()[vi1]));
-            w.write(le((float) -m.getVerticesZ()[vi1]));
+            w.write(le((float) m.getVerticesZ()[vi1]));
             w.write(le((float) -m.getVerticesY()[vi1]));
 
             // vertex 2
             w.write(le((float) m.getVerticesX()[vi2]));
-            w.write(le((float) -m.getVerticesZ()[vi2]));
+            w.write(le((float) m.getVerticesZ()[vi2]));
             w.write(le((float) -m.getVerticesY()[vi2]));
 
             // vertex 3
             w.write(le((float) m.getVerticesX()[vi3]));
-            w.write(le((float) -m.getVerticesZ()[vi3]));
+            w.write(le((float) m.getVerticesZ()[vi3]));
             w.write(le((float) -m.getVerticesY()[vi3]));
 
             // "attribute byte count" unused

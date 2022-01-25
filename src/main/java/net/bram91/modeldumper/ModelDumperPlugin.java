@@ -77,8 +77,6 @@ public class ModelDumperPlugin extends Plugin
 	private final ImmutableList<String> set = ImmutableList.of(
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
-	private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-
 
 	@Inject
 	private Client client;
@@ -186,8 +184,6 @@ public class ModelDumperPlugin extends Plugin
 
 	private void exportObjectModel(MenuEntry entry)
 	{
-		String timestamp = TIME_FORMAT.format(new Date());
-
 		int id = entry.getIdentifier();
 		String menuTarget = entry.getTarget();
 		Scene scene = client.getScene();
