@@ -180,7 +180,7 @@ public class ModelDumperPlugin extends Plugin
 			localPlayer.setAnimation(2566);
 			localPlayer.setAnimationFrame(0);
 		}
-		Exporter.export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName(), config.exportFormat());
+		Exporter.export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName());
 	}
 
 	private void exportObjectModel(MenuEntry entry)
@@ -206,12 +206,12 @@ public class ModelDumperPlugin extends Plugin
 					if (wallObject != null && wallObject.getId() == id)
 					{
 
-						Exporter.export(wallObject.getRenderable1(), "Object " + Text.removeFormattingTags(menuTarget), config.exportFormat());
+						Exporter.export(wallObject.getRenderable1(), "Object " + Text.removeFormattingTags(menuTarget));
 						return;
 					}
 					else if (decoration != null && decoration.getId() == id)
 					{
-						Exporter.export(decoration.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget), config.exportFormat());
+						Exporter.export(decoration.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget));
 						return;
 					}
 					else
@@ -219,7 +219,7 @@ public class ModelDumperPlugin extends Plugin
 						for (GameObject gameObject : gameObjects) {
 							if (gameObject != null && gameObject.getId() == id) {
 								if (gameObject.getRenderable() != null) {
-									Exporter.export(gameObject.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget), config.exportFormat());
+									Exporter.export(gameObject.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget));
 									return;
 								}
 							}
@@ -227,7 +227,7 @@ public class ModelDumperPlugin extends Plugin
 
 						for (GroundItem groundItem : groundItemsOnTile) {
 							if (groundItem.getId() == id) {
-								Exporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget), config.exportFormat());
+								Exporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget));
 								return;
 							}
 						}
@@ -242,7 +242,7 @@ public class ModelDumperPlugin extends Plugin
 		String menuTarget = entry.getTarget();
 		int identifier = entry.getIdentifier();
 		NPC npc = client.getCachedNPCs()[identifier];
-		Exporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget), config.exportFormat());
+		Exporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget));
 	}
 
 	private void exportPetModel(String menuTarget, int identifier)
@@ -258,7 +258,7 @@ public class ModelDumperPlugin extends Plugin
 
 		if(npc!=null)
 		{
-			Exporter.export(npc.getModel(), "Pet " + Text.removeFormattingTags(menuTarget), config.exportFormat());
+			Exporter.export(npc.getModel(), "Pet " + Text.removeFormattingTags(menuTarget));
 		}
 	}
 
@@ -274,7 +274,7 @@ public class ModelDumperPlugin extends Plugin
 		{
 			if (client.getPlayers().get(i).getName().equals(trgt))
 			{
-				Exporter.export(client.getPlayers().get(i).getModel(), "Player " + trgt, config.exportFormat());
+				Exporter.export(client.getPlayers().get(i).getModel(), "Player " + trgt);
 			}
 		}
 	}
@@ -429,5 +429,6 @@ public class ModelDumperPlugin extends Plugin
 	{
 		return instance.client;
 	}
+	protected static ModelDumperPluginConfig getConfig() { return instance.config; }
 
 }

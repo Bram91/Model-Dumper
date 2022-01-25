@@ -3,7 +3,11 @@ package net.bram91.modeldumper;
 import net.runelite.api.Model;
 
 import java.awt.Color;
-import java.io.*;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

@@ -1,8 +1,6 @@
 package net.bram91.modeldumper;
 
 import net.runelite.api.Model;
-import net.runelite.api.Renderable;
-import net.runelite.client.RuneLite;
 
 import java.awt.Color;
 import java.io.FileNotFoundException;

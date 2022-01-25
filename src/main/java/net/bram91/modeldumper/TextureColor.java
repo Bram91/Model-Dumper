@@ -2,7 +2,7 @@ package net.bram91.modeldumper;
 
 import net.runelite.api.Client;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 

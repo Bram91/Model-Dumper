@@ -16,7 +16,7 @@ public class Exporter
     private final static String PATH = RuneLite.RUNELITE_DIR + "//models//";
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
-    public static void export(Renderable r, String name, ExportFormat exportMode)
+    public static void export(Renderable r, String name)
     {
         Model m;
         if (r instanceof Model)
@@ -28,14 +28,14 @@ public class Exporter
             m = r.getModel();
         }
 
-        export(m, name, exportMode);
+        export(m, name);
     }
 
-    public static void export(Model m, String name, ExportFormat exportMode)
+    public static void export(Model m, String name)
     {
         name = PATH + name + " " + TIME_FORMAT.format(new Date());
 
-        switch (exportMode)
+        switch (ModelDumperPlugin.getConfig().exportFormat())
         {
             case OBJ:
                 try
@@ -57,6 +57,15 @@ public class Exporter
                     e.printStackTrace();
                 }
                 break;
+            case STL:
+                try
+                {
+                    STLExporter.export(m, name);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
             default:
                 break;
         }
