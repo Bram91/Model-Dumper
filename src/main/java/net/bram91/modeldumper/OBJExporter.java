@@ -1,5 +1,6 @@
 package net.bram91.modeldumper;
 
+import java.io.File;
 import net.runelite.api.Model;
 
 import java.awt.Color;
@@ -11,7 +12,42 @@ import java.util.List;
 public class OBJExporter
 {
 
-    public static void export(Model m, String name) throws FileNotFoundException
+    private final static String PATH = RuneLite.RUNELITE_DIR + "//models//";
+
+    public static void export(Renderable r, String name)
+    {
+        Model m;
+        if (r instanceof Model)
+        {
+            m = (Model) r;
+        }
+        else
+        {
+            m = r.getModel();
+        }
+
+        export(m, name);
+    }
+
+    public static void export(Model m, String name)
+    {
+        try
+        {
+			File folder = new File(PATH);
+
+			if (!folder.exists())
+			{
+				folder.mkdir();
+			}
+            exportModel(m, name);
+        }
+		catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private static void exportModel(Model m, String name) throws FileNotFoundException
     {
         if (m == null)
             return;
