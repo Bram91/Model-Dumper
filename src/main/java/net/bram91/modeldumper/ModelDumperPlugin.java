@@ -167,7 +167,7 @@ public class ModelDumperPlugin extends Plugin
 						.setIdentifier(target.getIdentifier())
 						.onClick(this::exportObjectModel);
 				}
-				else if(target.getType().equals(MenuAction.NPC_FIRST_OPTION)||target.getType().equals(MenuAction.NPC_SECOND_OPTION)||target.getType().equals(MenuAction.NPC_THIRD_OPTION))
+				else if(target.getType().equals(MenuAction.NPC_FIRST_OPTION)||target.getType().equals(MenuAction.NPC_SECOND_OPTION)||target.getType().equals(MenuAction.NPC_THIRD_OPTION)||target.getType().equals((MenuAction.EXAMINE_NPC)))
 				{
 					client.createMenuEntry(0)
 						.setOption(EXPORT_MODEL)
