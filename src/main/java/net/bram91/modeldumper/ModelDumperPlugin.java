@@ -159,7 +159,7 @@ public class ModelDumperPlugin extends Plugin
 						.setIdentifier(target.getIdentifier())
 						.onClick(this::exportPlayerModel);
 				}
-				else if(target.getType().equals(MenuAction.EXAMINE_OBJECT))
+				else if(target.getType().equals(MenuAction.EXAMINE_ITEM_GROUND) || target.getType().equals(MenuAction.EXAMINE_OBJECT))
 				{
 					client.createMenuEntry(0)
 						.setOption(EXPORT_MODEL)
