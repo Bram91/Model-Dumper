@@ -27,15 +27,31 @@ package net.bram91.modeldumper;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 
 @ConfigGroup("modeldumper")
 public interface ModelDumperPluginConfig extends Config
 {
+	@ConfigSection(
+			name = "Exporter",
+			description = "Technical settings for the exporter",
+			position = 0
+	)
+	String exporterSection = "exporterSection";
+
+	@ConfigSection(
+			name = "Transmog",
+			description = "Technical settings for the transmog",
+			position = 1
+	)
+	String transmogSection = "transmogSection";
+
 	@ConfigItem(
 		keyName = "material",
 		name = "Export Color",
 		description = "Also export colors for the models.",
-		position = 1
+		position = 1,
+		section = exporterSection
 	)
 	default boolean material()
 	{
@@ -46,7 +62,8 @@ public interface ModelDumperPluginConfig extends Config
 			keyName = "forceRestPose",
 			name = "Force Rest Pose (Local Player)",
 			description = "Forces local player to perform an animation on export. The resulting model is in a rest pose.",
-			position = 2
+			position = 2,
+			section = exporterSection
 	)
 	default boolean forceRestPose() { return false; }
 
@@ -54,7 +71,52 @@ public interface ModelDumperPluginConfig extends Config
 			keyName="exportFormat",
 			name = "Export Format",
 			description="Select which 3d model file format to export to. OBJ uses averaged face colors while PLY uses vertex colors.",
-			position = 3
+			position = 3,
+			section = exporterSection
 	)
 	default ExportFormat exportFormat() { return ExportFormat.OBJ; }
+
+	@ConfigItem(
+			keyName = "transmogEnabled",
+			name = "Enabled",
+			description = "Possibility to transmog into a NPC to make export easier",
+			position = 0,
+			section = transmogSection
+	)
+	default boolean transmogEnabled() {
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = "npcId",
+			name = "NPC ID",
+			description = "NPC ID to transmog into",
+			position = 1,
+			section = transmogSection
+	)
+	default int npcId() {
+		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "animationId",
+			name = "Animation ID",
+			description = "Animation to perform. Use 0 to disable",
+			position = 2,
+			section = transmogSection
+	)
+	default int animationId() {
+		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "frame",
+			name = "Frame",
+			description = "Specific frame for the animation. Note: it will flicker a bit, but still easier to export a certain frame. Use 0 to disable",
+			position = 3,
+			section = transmogSection
+	)
+	default int frame() {
+		return 0;
+	}
 }
