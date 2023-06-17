@@ -30,17 +30,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.inject.Provides;
 
-import java.awt.Color;
 import java.awt.Shape;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,18 +44,12 @@ import javax.inject.Inject;
 
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.ClientTick;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.ItemDespawned;
-import net.runelite.api.events.ItemQuantityChanged;
-import net.runelite.api.events.ItemSpawned;
-import net.runelite.api.events.MenuOpened;
-import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.events.*;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.menus.MenuManager;
 import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
@@ -178,6 +167,50 @@ public class ModelDumperPlugin extends Plugin
 				break;
 
 			}
+		}
+	}
+	@Subscribe
+	public void onBeforeRender(BeforeRender beforeRender)
+	{
+		if(config.transmogEnabled() && config.frame() != 0)
+		{
+			Player player = client.getLocalPlayer();
+			player.setPoseAnimationFrame(config.frame());
+			player.setAnimationFrame(config.frame());
+		}
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged configChanged)
+	{
+		Player player = client.getLocalPlayer();
+		switch (configChanged.getKey())
+		{
+			case "npcId":
+				player.getPlayerComposition().setTransformedNpcId(Integer.parseInt(configChanged.getNewValue()));
+				break;
+			case "animationId":
+				int newValue = Integer.parseInt(configChanged.getNewValue());
+				if(newValue == 0)
+				{
+					player.setIdlePoseAnimation(-1);
+				} else
+				{
+					player.setIdlePoseAnimation(newValue);
+				}
+				break;
+			case "transmogEnabled":
+				if(Boolean.parseBoolean(configChanged.getNewValue()))
+				{
+					player.getPlayerComposition().setTransformedNpcId(config.npcId());
+					player.setIdlePoseAnimation(config.animationId());
+				} else
+				{
+					player.getPlayerComposition().setTransformedNpcId(-1);
+					player.setIdlePoseAnimation(-1);
+					player.setPoseAnimation(-1);
+				}
+				break;
 		}
 	}
 
