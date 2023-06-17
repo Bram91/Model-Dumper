@@ -175,8 +175,11 @@ public class ModelDumperPlugin extends Plugin
 		if(config.transmogEnabled() && config.frame() != 0)
 		{
 			Player player = client.getLocalPlayer();
-			player.setPoseAnimationFrame(config.frame());
-			player.setAnimationFrame(config.frame());
+			if(player != null)
+			{
+				player.setPoseAnimationFrame(config.frame());
+				player.setAnimationFrame(config.frame());
+			}
 		}
 	}
 
@@ -184,33 +187,36 @@ public class ModelDumperPlugin extends Plugin
 	public void onConfigChanged(ConfigChanged configChanged)
 	{
 		Player player = client.getLocalPlayer();
-		switch (configChanged.getKey())
+		if(player != null)
 		{
-			case "npcId":
-				player.getPlayerComposition().setTransformedNpcId(Integer.parseInt(configChanged.getNewValue()));
-				break;
-			case "animationId":
-				int newValue = Integer.parseInt(configChanged.getNewValue());
-				if(newValue == 0)
-				{
-					player.setIdlePoseAnimation(-1);
-				} else
-				{
-					player.setIdlePoseAnimation(newValue);
-				}
-				break;
-			case "transmogEnabled":
-				if(Boolean.parseBoolean(configChanged.getNewValue()))
-				{
-					player.getPlayerComposition().setTransformedNpcId(config.npcId());
-					player.setIdlePoseAnimation(config.animationId());
-				} else
-				{
-					player.getPlayerComposition().setTransformedNpcId(-1);
-					player.setIdlePoseAnimation(-1);
-					player.setPoseAnimation(-1);
-				}
-				break;
+			switch (configChanged.getKey())
+			{
+				case "npcId":
+					player.getPlayerComposition().setTransformedNpcId(Integer.parseInt(configChanged.getNewValue()));
+					break;
+				case "animationId":
+					int newValue = Integer.parseInt(configChanged.getNewValue());
+					if(newValue == 0)
+					{
+						player.setIdlePoseAnimation(-1);
+					} else
+					{
+						player.setIdlePoseAnimation(newValue);
+					}
+					break;
+				case "transmogEnabled":
+					if(Boolean.parseBoolean(configChanged.getNewValue()))
+					{
+						player.getPlayerComposition().setTransformedNpcId(config.npcId());
+						player.setIdlePoseAnimation(config.animationId());
+					} else
+					{
+						player.getPlayerComposition().setTransformedNpcId(-1);
+						player.setIdlePoseAnimation(-1);
+						player.setPoseAnimation(-1);
+					}
+					break;
+			}
 		}
 	}
 
