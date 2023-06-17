@@ -6,3 +6,6 @@ To export the local player right click the equipment tab(If you use resizable mo
 ##### Colors can be exported with the exception of firecape/infernal cape textures
 
 Models will be stored in the `.runelite/models/` folder.
+
+
+### When using the transmog option it is recommended to disable animation smoothing
