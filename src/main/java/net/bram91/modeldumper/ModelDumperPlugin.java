@@ -188,16 +188,22 @@ public class ModelDumperPlugin extends Plugin
 			switch (configChanged.getKey())
 			{
 				case "npcId":
-					player.getPlayerComposition().setTransformedNpcId(Integer.parseInt(configChanged.getNewValue()));
+					if(config.transmogEnabled())
+					{
+						player.getPlayerComposition().setTransformedNpcId(Integer.parseInt(configChanged.getNewValue()));
+					}
 					break;
 				case "animationId":
-					int newValue = Integer.parseInt(configChanged.getNewValue());
-					if(newValue == 0)
+					if(config.transmogEnabled())
 					{
-						player.setIdlePoseAnimation(-1);
-					} else
-					{
-						player.setIdlePoseAnimation(newValue);
+						int newValue = Integer.parseInt(configChanged.getNewValue());
+						if (newValue == 0)
+						{
+							player.setIdlePoseAnimation(-1);
+						} else
+						{
+							player.setIdlePoseAnimation(newValue);
+						}
 					}
 					break;
 				case "transmogEnabled":
