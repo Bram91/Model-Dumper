@@ -38,14 +38,7 @@ public class Exporter
         switch (ModelDumperPlugin.getConfig().exportFormat())
         {
             case OBJ:
-                try
-                {
                     OBJExporter.export(m, name);
-                }
-                catch (FileNotFoundException e)
-                {
-                    e.printStackTrace();
-                }
                 break;
             case PLY:
                 try
