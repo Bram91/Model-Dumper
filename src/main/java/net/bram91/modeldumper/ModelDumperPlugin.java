@@ -30,17 +30,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.inject.Provides;
 
-import java.awt.Color;
 import java.awt.Shape;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,7 +49,6 @@ import net.runelite.api.events.ItemSpawned;
 import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.client.RuneLite;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -86,7 +77,6 @@ public class ModelDumperPlugin extends Plugin
 	private final ImmutableList<String> set = ImmutableList.of(
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
-	private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
 	@Inject
 	private Client client;
@@ -189,14 +179,11 @@ public class ModelDumperPlugin extends Plugin
 			localPlayer.setAnimation(2566);
 			localPlayer.setAnimationFrame(0);
 		}
-		DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-		OBJExporter.export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName() + " " + TIME_FORMAT.format(new Date()));
+		Exporter.export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName());
 	}
 
 	private void exportObjectModel(MenuEntry entry)
 	{
-		String timestamp = TIME_FORMAT.format(new Date());
-
 		int id = entry.getIdentifier();
 		String menuTarget = entry.getTarget();
 		Scene scene = client.getScene();
@@ -218,12 +205,12 @@ public class ModelDumperPlugin extends Plugin
 					if (wallObject != null && wallObject.getId() == id)
 					{
 
-						OBJExporter.export(wallObject.getRenderable1(), "Object " + Text.removeFormattingTags(menuTarget) + " " + timestamp);
+						Exporter.export(wallObject.getRenderable1(), "Object " + Text.removeFormattingTags(menuTarget));
 						return;
 					}
 					else if (decoration != null && decoration.getId() == id)
 					{
-						OBJExporter.export(decoration.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget) + " " + timestamp);
+						Exporter.export(decoration.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget));
 						return;
 					}
 					else
@@ -231,8 +218,7 @@ public class ModelDumperPlugin extends Plugin
 						for (GameObject gameObject : gameObjects) {
 							if (gameObject != null && gameObject.getId() == id) {
 								if (gameObject.getRenderable() != null) {
-									DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-									OBJExporter.export(gameObject.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget) + " " + timestamp);
+									Exporter.export(gameObject.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget));
 									return;
 								}
 							}
@@ -240,8 +226,7 @@ public class ModelDumperPlugin extends Plugin
 
 						for (GroundItem groundItem : groundItemsOnTile) {
 							if (groundItem.getId() == id) {
-								DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-								OBJExporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget) + " " + timestamp);
+								Exporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget));
 								return;
 							}
 						}
@@ -256,7 +241,7 @@ public class ModelDumperPlugin extends Plugin
 		String menuTarget = entry.getTarget();
 		int identifier = entry.getIdentifier();
 		NPC npc = client.getCachedNPCs()[identifier];
-		OBJExporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()));
+		Exporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget));
 	}
 
 	private void exportPetModel(String menuTarget, int identifier)
@@ -272,7 +257,7 @@ public class ModelDumperPlugin extends Plugin
 
 		if(npc!=null)
 		{
-			OBJExporter.export(npc.getModel(), "Pet " + Text.removeFormattingTags(menuTarget) + " " + TIME_FORMAT.format(new Date()));
+			Exporter.export(npc.getModel(), "Pet " + Text.removeFormattingTags(menuTarget));
 		}
 	}
 
@@ -288,7 +273,7 @@ public class ModelDumperPlugin extends Plugin
 		{
 			if (client.getPlayers().get(i).getName().equals(trgt))
 			{
-				OBJExporter.export(client.getPlayers().get(i).getModel(), "Player " + trgt + " " + TIME_FORMAT.format(new Date()));
+				Exporter.export(client.getPlayers().get(i).getModel(), "Player " + trgt);
 			}
 		}
 	}
@@ -443,5 +428,6 @@ public class ModelDumperPlugin extends Plugin
 	{
 		return instance.client;
 	}
+	protected static ModelDumperPluginConfig getConfig() { return instance.config; }
 
 }

@@ -2,8 +2,6 @@ package net.bram91.modeldumper;
 
 import java.io.File;
 import net.runelite.api.Model;
-import net.runelite.api.Renderable;
-import net.runelite.client.RuneLite;
 
 import java.awt.Color;
 import java.io.FileNotFoundException;
@@ -57,8 +55,8 @@ public class OBJExporter
         name = name.replace(" ", "_");
 
         // Open writers
-        PrintWriter obj = new PrintWriter(PATH + name + ".obj");
-        PrintWriter mtl = new PrintWriter(PATH + name + ".mtl");
+        PrintWriter obj = new PrintWriter(name + ".obj");
+        PrintWriter mtl = new PrintWriter(name + ".mtl");
         obj.println("# Made by RuneLite Model-Dumper Plugin");
         obj.println("o " + name);
 
