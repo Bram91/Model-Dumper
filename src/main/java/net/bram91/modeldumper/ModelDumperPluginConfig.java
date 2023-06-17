@@ -95,7 +95,7 @@ public interface ModelDumperPluginConfig extends Config
 			section = transmogSection
 	)
 	default int npcId() {
-		return -1;
+		return 0;
 	}
 
 	@ConfigItem(
@@ -106,7 +106,7 @@ public interface ModelDumperPluginConfig extends Config
 			section = transmogSection
 	)
 	default int animationId() {
-		return -1;
+		return 0;
 	}
 
 	@ConfigItem(
@@ -117,6 +117,6 @@ public interface ModelDumperPluginConfig extends Config
 			section = transmogSection
 	)
 	default int frame() {
-		return -1;
+		return 0;
 	}
 }
