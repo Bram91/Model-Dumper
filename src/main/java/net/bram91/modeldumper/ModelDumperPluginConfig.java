@@ -28,6 +28,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
+import net.runelite.client.config.Range;
 
 @ConfigGroup("modeldumper")
 public interface ModelDumperPluginConfig extends Config
@@ -94,6 +95,7 @@ public interface ModelDumperPluginConfig extends Config
 			position = 1,
 			section = transmogSection
 	)
+	@Range(min=-1)
 	default int npcId() {
 		return 0;
 	}
