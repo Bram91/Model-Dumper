@@ -54,8 +54,6 @@ public class OBJExporter
         if (m == null)
             return;
 
-        name = name.replace(" ", "_");
-
         // Open writers
         PrintWriter obj = new PrintWriter(name + ".obj");
         PrintWriter mtl = new PrintWriter(name + ".mtl");
