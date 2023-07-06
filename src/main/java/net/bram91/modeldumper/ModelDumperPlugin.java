@@ -31,15 +31,16 @@ import com.google.common.collect.Table;
 import com.google.inject.Provides;
 
 import java.awt.Shape;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+import jdk.internal.org.jline.utils.Log;
 import net.runelite.api.*;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.WidgetInfo;
@@ -52,6 +53,7 @@ import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
+import org.graalvm.compiler.hotspot.stubs.OutOfBoundsExceptionStub;
 
 @PluginDescriptor(
 	name = "Model Exporter",
@@ -62,6 +64,7 @@ public class ModelDumperPlugin extends Plugin
 {
 	private static ModelDumperPlugin instance;
 	private static final String EXPORT_MODEL = "Export Model";
+	private static final String EXPORT_SEQUENCE = "Export Animation Sequence";
 	private static final String MENU_TARGET = "Player";
 	private static final WidgetMenuOption FIXED_EQUIPMENT_TAB_EXPORT = new WidgetMenuOption(EXPORT_MODEL,
 		MENU_TARGET, WidgetInfo.FIXED_VIEWPORT_EQUIPMENT_TAB);
@@ -69,6 +72,13 @@ public class ModelDumperPlugin extends Plugin
 		MENU_TARGET, WidgetInfo.RESIZABLE_VIEWPORT_EQUIPMENT_TAB);
 	private static final WidgetMenuOption RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT = new WidgetMenuOption(EXPORT_MODEL,
 		MENU_TARGET,WidgetInfo.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
+
+	private static final WidgetMenuOption FIXED_EQUIPMENT_TAB_EXPORT_SEQ = new WidgetMenuOption(EXPORT_SEQUENCE,
+			MENU_TARGET, WidgetInfo.FIXED_VIEWPORT_EQUIPMENT_TAB);
+	private static final WidgetMenuOption RESIZABLE_EQUIPMENT_TAB_EXPORT_SEQ = new WidgetMenuOption(EXPORT_SEQUENCE,
+			MENU_TARGET, WidgetInfo.RESIZABLE_VIEWPORT_EQUIPMENT_TAB);
+	private static final WidgetMenuOption RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT_SEQ = new WidgetMenuOption(EXPORT_SEQUENCE,
+			MENU_TARGET,WidgetInfo.RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB);
 	private final ImmutableList<String> set = ImmutableList.of(
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
@@ -93,12 +103,51 @@ public class ModelDumperPlugin extends Plugin
 
 	private final Table<WorldPoint, Integer, GroundItem> groundItems = HashBasedTable.create();
 
+	private Boolean ranOnce = false;
+	private Class<?> animation;
+	private Field var1;
+	private int getAnimationDuration(int id)
+	{
+		if(!ranOnce)
+		{
+			ranOnce = true;
+			ClassLoader classLoader = client.getClass().getClassLoader();
+
+			try {
+				animation = classLoader.loadClass("hy");//Animation
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+			try {
+				var1 = animation.getDeclaredField("ar");//animation frame ids
+			} catch (NoSuchFieldException e) {
+				throw new RuntimeException(e);
+			}
+			var1.setAccessible(true);
+		}
+		try {
+			Animation animation = client.loadAnimation(config.animationId());
+			if(animation != null) {
+				int[] animationArray = ((int[]) var1.get(animation));
+				return animationArray.length;
+			}
+		} catch (IllegalAccessException e) {
+
+		}
+		return -1;
+	}
+
 	@Override
 	protected void startUp() throws Exception
 	{
 		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
 		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
 		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT,this::exportLocalPlayerModel);
+
+		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT_SEQ,this::exportLocalPlayerSequence);
+		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT_SEQ,this::exportLocalPlayerSequence);
+		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT_SEQ,this::exportLocalPlayerSequence);
+
 		ModelDumperPlugin.instance = this;
 	}
 
@@ -108,6 +157,11 @@ public class ModelDumperPlugin extends Plugin
 		menuManager.removeManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT);
 		menuManager.removeManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT);
 		menuManager.removeManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT);
+
+		menuManager.removeManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT_SEQ);
+		menuManager.removeManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT_SEQ);
+		menuManager.removeManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT_SEQ);
+
 		groundItems.clear();
 	}
 
@@ -135,8 +189,7 @@ public class ModelDumperPlugin extends Plugin
 			if (client.isKeyPressed(KeyCode.KC_SHIFT) && addMenuEntry)
 			{
 				String entityName = target.getTarget();
-
-				if(target.getOption().equals("Trade with"))
+				if(target.getPlayer() != null)
 				{
 					client.createMenuEntry(0)
 						.setOption(EXPORT_MODEL)
@@ -152,7 +205,7 @@ public class ModelDumperPlugin extends Plugin
 						.setIdentifier(target.getIdentifier())
 						.onClick(this::exportObjectModel);
 				}
-				else if(target.getType().equals(MenuAction.NPC_FIRST_OPTION)||target.getType().equals(MenuAction.NPC_SECOND_OPTION)||target.getType().equals(MenuAction.NPC_THIRD_OPTION)||target.getType().equals((MenuAction.EXAMINE_NPC)))
+				else if(target.getNpc()!=null && !target.getNpc().getComposition().isFollower())
 				{
 					client.createMenuEntry(0)
 						.setOption(EXPORT_MODEL)
@@ -173,8 +226,16 @@ public class ModelDumperPlugin extends Plugin
 			Player player = client.getLocalPlayer();
 			if(player != null)
 			{
-				player.setPoseAnimationFrame(config.frame());
-				player.setAnimationFrame(config.frame());
+				if(config.frame() < getAnimationDuration(config.animationId()))
+				{
+					player.setAnimationFrame(config.frame());
+					player.setPoseAnimationFrame(config.frame());
+				}
+				else
+				{
+					player.setAnimationFrame(getAnimationDuration(config.animationId()) - 1);
+					player.setPoseAnimationFrame(getAnimationDuration(config.animationId()) - 1);
+				}
 			}
 		}
 	}
@@ -200,7 +261,8 @@ public class ModelDumperPlugin extends Plugin
 						if (newValue == 0)
 						{
 							player.setIdlePoseAnimation(-1);
-						} else
+						}
+						else
 						{
 							player.setIdlePoseAnimation(newValue);
 						}
@@ -211,7 +273,8 @@ public class ModelDumperPlugin extends Plugin
 					{
 						player.getPlayerComposition().setTransformedNpcId(config.npcId());
 						player.setIdlePoseAnimation(config.animationId());
-					} else
+					}
+					else
 					{
 						player.getPlayerComposition().setTransformedNpcId(-1);
 						player.setIdlePoseAnimation(-1);
@@ -231,6 +294,22 @@ public class ModelDumperPlugin extends Plugin
 			localPlayer.setAnimationFrame(0);
 		}
 		Exporter.export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName());
+	}
+
+	private void exportLocalPlayerSequence(MenuEntry entry)
+	{
+		Player localPlayer = client.getLocalPlayer();
+
+		Date dateTime = new Date();
+		for(int i = 0; i < getAnimationDuration(config.animationId()); i++)
+		{
+			if(client.loadAnimation(config.animationId())!=null)
+			{
+				localPlayer.setAnimation(config.animationId());
+				localPlayer.setAnimationFrame(i);
+				Exporter.exportSequence(localPlayer.getModel(), config.animationId(), i, dateTime);
+			}
+		}
 	}
 
 	private void exportObjectModel(MenuEntry entry)
@@ -295,8 +374,10 @@ public class ModelDumperPlugin extends Plugin
 		Exporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget));
 	}
 
-	private void exportPetModel(String menuTarget, int identifier)
+	private void exportPetModel(MenuEntry entry)
 	{
+		String menuTarget = entry.getTarget();
+		int identifier = entry.getIdentifier();
 		NPC npc=null;
 		for(NPC npC:client.getNpcs())
 		{
@@ -407,11 +488,7 @@ public class ModelDumperPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick clientTick)
 	{
-		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen())
-		{
-			return;
-		}
-		else if(client.isKeyPressed(KeyCode.KC_SHIFT))
+		if (client.getGameState() == GameState.LOGGED_IN && !client.isMenuOpen() && client.isKeyPressed(KeyCode.KC_SHIFT))
 		{
 			addMenus();
 		}
@@ -421,45 +498,17 @@ public class ModelDumperPlugin extends Plugin
 	{
 		Point mouseCanvasPosition = client.getMouseCanvasPosition();
 
-		List<NPC> petsUnderCursor = getPetsUnderCursor(mouseCanvasPosition);
+		List<NPC> petsUnderCursor = pets.stream().filter(p -> isClickable(p, mouseCanvasPosition)).collect(Collectors.toList());
 		if (!petsUnderCursor.isEmpty())
 		{
 			for (NPC pet : petsUnderCursor)
 			{
-				addPetInfoMenu(pet);
+				client.createMenuEntry(0)
+						.setOption(EXPORT_MODEL)
+						.setTarget(pet.getName())
+						.setIdentifier(pet.getId())
+						.onClick(this::exportPetModel);
 			}
-		}
-	}
-
-	private void addPetInfoMenu(NPC pet)
-	{
-		/*final MenuEntry exportMenuEntry = new MenuEntry();
-		exportMenuEntry.setOption(EXPORT_MODEL);
-		exportMenuEntry.setTarget(pet.getName());
-		exportMenuEntry.setType(MenuAction.RUNELITE.getId());
-		exportMenuEntry.setIdentifier(pet.getId());
-		exportMenuEntry.setParam1(4);
-		addEntry(exportMenuEntry);*/
-	}
-
-	private final List<NPC> pets = new ArrayList<>();
-
-	private List<NPC> getPetsUnderCursor(Point mouseCanvasPosition)
-	{
-		return pets.stream().filter(p -> {
-			return isClickable(p, mouseCanvasPosition);
-		}).collect(Collectors.toList());
-	}
-
-	@Subscribe
-	public void onNpcSpawned(NpcSpawned npcSpawned)
-	{
-		NPC npc = npcSpawned.getNpc();
-		Pet pet = Pet.findPet(npc.getId());
-
-		if (pet != null)
-		{
-			pets.add(npc);
 		}
 	}
 
@@ -473,6 +522,28 @@ public class ModelDumperPlugin extends Plugin
 		}
 
 		return false;
+	}
+
+	private final List<NPC> pets = new ArrayList<>();
+
+	@Subscribe
+	public void onNpcSpawned(NpcSpawned npcSpawned)
+	{
+		NPC npc = npcSpawned.getNpc();
+		if(npc.getComposition().isFollower())
+		{
+			pets.add(npc);
+		}
+	}
+
+	@Subscribe
+	public void onNpcDespawned(NpcDespawned npcDespawned)
+	{
+		NPC npc = npcDespawned.getNpc();
+		if(npc.getComposition().isFollower())
+		{
+			pets.remove(npc);
+		}
 	}
 
 	protected static Client getClient()

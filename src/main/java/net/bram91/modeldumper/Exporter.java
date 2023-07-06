@@ -4,6 +4,7 @@ import net.runelite.api.Model;
 import net.runelite.api.Renderable;
 import net.runelite.client.RuneLite;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -64,4 +65,14 @@ public class Exporter
         }
     }
 
+    public static void exportSequence(Model model, int id, int frame, Date dateTime)
+    {
+        String path = PATH + "sequences//" + TIME_FORMAT.format(dateTime) + "//";
+        File folder = new File(path);
+        if (!folder.exists())
+        {
+            folder.mkdirs();
+        }
+        OBJExporter.export(model, path + id + "-" + frame);
+    }
 }

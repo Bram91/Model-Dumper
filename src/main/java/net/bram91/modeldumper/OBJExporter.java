@@ -27,7 +27,6 @@ public class OBJExporter
         {
             m = r.getModel();
         }
-
         export(m, name);
     }
 
@@ -41,6 +40,7 @@ public class OBJExporter
 			{
 				folder.mkdir();
 			}
+
             exportModel(m, name);
         }
 		catch (FileNotFoundException e)
@@ -58,6 +58,7 @@ public class OBJExporter
         PrintWriter obj = new PrintWriter(name + ".obj");
         PrintWriter mtl = new PrintWriter(name + ".mtl");
         obj.println("# Made by RuneLite Model-Dumper Plugin");
+        obj.println("mtllib " + name + ".mtl");
         obj.println("o " + name);
 
         // Write vertices
