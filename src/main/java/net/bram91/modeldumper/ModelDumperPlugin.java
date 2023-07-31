@@ -31,7 +31,10 @@ import com.google.common.collect.Table;
 import com.google.inject.Provides;
 
 import java.awt.Shape;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -102,8 +105,6 @@ public class ModelDumperPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		ClassLoader classLoader = client.getClass().getClassLoader();
-
 		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
 		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
 		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT,this::exportLocalPlayerModel);
@@ -153,6 +154,7 @@ public class ModelDumperPlugin extends Plugin
 			if (client.isKeyPressed(KeyCode.KC_SHIFT) && addMenuEntry)
 			{
 				String entityName = target.getTarget();
+
 				if(target.getPlayer() != null)
 				{
 					client.createMenuEntry(0)
@@ -226,8 +228,7 @@ public class ModelDumperPlugin extends Plugin
 						if (newValue == 0)
 						{
 							player.setIdlePoseAnimation(-1);
-						}
-						else
+						} else
 						{
 							player.setIdlePoseAnimation(newValue);
 						}
@@ -238,8 +239,7 @@ public class ModelDumperPlugin extends Plugin
 					{
 						player.getPlayerComposition().setTransformedNpcId(config.npcId());
 						player.setIdlePoseAnimation(config.animationId());
-					}
-					else
+					} else
 					{
 						player.getPlayerComposition().setTransformedNpcId(-1);
 						player.setIdlePoseAnimation(-1);

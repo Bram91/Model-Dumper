@@ -27,6 +27,7 @@ public class OBJExporter
         {
             m = r.getModel();
         }
+
         export(m, name);
     }
 
@@ -40,7 +41,6 @@ public class OBJExporter
 			{
 				folder.mkdir();
 			}
-
             exportModel(m, name);
         }
 		catch (FileNotFoundException e)
