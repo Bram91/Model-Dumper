@@ -258,11 +258,10 @@ public class ModelDumperPlugin extends Plugin
 			localPlayer.setAnimation(2566);
 			localPlayer.setAnimationFrame(0);
 		}
-		Exporter.export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName());
+		Exporter.export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName(), false);
 	}
 
-	private void exportLocalPlayerSequence(MenuEntry entry)
-	{
+	private void exportLocalPlayerSequence(MenuEntry entry) {
 		Player localPlayer = client.getLocalPlayer();
 
 		Date dateTime = new Date();
@@ -325,7 +324,7 @@ public class ModelDumperPlugin extends Plugin
 
 						for (GroundItem groundItem : groundItemsOnTile) {
 							if (groundItem.getId() == id) {
-								Exporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget));
+								Exporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget), false);
 								return;
 							}
 						}
@@ -340,7 +339,7 @@ public class ModelDumperPlugin extends Plugin
 		String menuTarget = entry.getTarget();
 		int identifier = entry.getIdentifier();
 		NPC npc = client.getCachedNPCs()[identifier];
-		Exporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget));
+		Exporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget), false);
 	}
 
 	private void exportPetModel(MenuEntry entry)
@@ -358,7 +357,7 @@ public class ModelDumperPlugin extends Plugin
 
 		if(npc!=null)
 		{
-			Exporter.export(npc.getModel(), "Pet " + Text.removeFormattingTags(menuTarget));
+			Exporter.export(npc.getModel(), "Pet " + Text.removeFormattingTags(menuTarget), false);
 		}
 	}
 
@@ -374,7 +373,7 @@ public class ModelDumperPlugin extends Plugin
 		{
 			if (client.getPlayers().get(i).getName().equals(trgt))
 			{
-				Exporter.export(client.getPlayers().get(i).getModel(), "Player " + trgt);
+				Exporter.export(client.getPlayers().get(i).getModel(), "Player " + trgt, false);
 			}
 		}
 	}

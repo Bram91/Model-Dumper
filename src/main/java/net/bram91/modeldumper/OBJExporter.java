@@ -31,7 +31,7 @@ public class OBJExporter
         export(m, name);
     }
 
-    public static void export(Model m, String name)
+    public static void export(Model m, String path, String name, boolean seq)
     {
         try
         {
@@ -41,7 +41,7 @@ public class OBJExporter
 			{
 				folder.mkdir();
 			}
-            exportModel(m, name);
+            exportModel(m, path, name, seq);
         }
 		catch (FileNotFoundException e)
         {
@@ -49,16 +49,22 @@ public class OBJExporter
         }
     }
 
-    private static void exportModel(Model m, String name) throws FileNotFoundException
+    private static void exportModel(Model m, String path, String name, boolean seq) throws FileNotFoundException
     {
         if (m == null)
             return;
 
+        String mtlName = name;
+        if(seq)
+        {
+            mtlName = name.split("-")[0]+"-"+name.split("-")[1];
+        }
+
         // Open writers
-        PrintWriter obj = new PrintWriter(name + ".obj");
-        PrintWriter mtl = new PrintWriter(name + ".mtl");
+        PrintWriter obj = new PrintWriter(path+ name + ".obj");
+        PrintWriter mtl = new PrintWriter(path + mtlName + ".mtl");
         obj.println("# Made by RuneLite Model-Dumper Plugin");
-        obj.println("mtllib " + name + ".mtl");
+        obj.println("mtllib " + mtlName + ".mtl");
         obj.println("o " + name);
 
         // Write vertices

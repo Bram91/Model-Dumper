@@ -11,7 +11,7 @@ Models will be stored in the `.runelite/models/` folder.
 _This feature will works with the transmog settings in the plugin and thus only works with the local player model._
 
 Sequences will be exported in the `.runelite/models/sequences` directory in the following format:
-`year-month-day_time/<player or npc id>-animation-frame.obj`
+`year-month-day_time/<player or npc id>-animation-frame.extension`
 
 For example exporting npc id 12214 with animation 10276 will result in: `12214-10276-0.obj` through `12214-10276-119.obj`
 where exporting the local player model with animation 7121 will result in `player-7121-0.obj` through `player-7121-43.obj`

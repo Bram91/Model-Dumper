@@ -5,7 +5,6 @@ import net.runelite.api.Renderable;
 import net.runelite.client.RuneLite;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,7 +12,6 @@ import java.util.Date;
 
 public class Exporter
 {
-
     private final static String PATH = RuneLite.RUNELITE_DIR + "//models//";
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
@@ -29,22 +27,27 @@ public class Exporter
             m = r.getModel();
         }
 
-        export(m, name);
+        export(m, name, false);
     }
-
-    public static void export(Model m, String name)
+    public static void export(Model m, String name, boolean seq)
     {
-        name = PATH + name + " " + TIME_FORMAT.format(new Date());
+        export(m,null,name,seq);
+    }
+    public static void export(Model m, String path, String name, boolean seq)
+    {
+        if(!seq) {
+            name = name + " " + TIME_FORMAT.format(new Date());
+        }
 
         switch (ModelDumperPlugin.getConfig().exportFormat())
         {
             case OBJ:
-                    OBJExporter.export(m, name);
+                OBJExporter.export(m, ((seq) ? path : PATH), name, seq);
                 break;
             case PLY:
                 try
                 {
-                    PLYExporter.export(m, name);
+                    PLYExporter.export(m, ((seq) ? path : PATH) + name);
                 }
                 catch (IOException e)
                 {
@@ -54,7 +57,7 @@ public class Exporter
             case STL:
                 try
                 {
-                    STLExporter.export(m, name);
+                    STLExporter.export(m, ((seq) ? path : PATH) + name);
                 }
                 catch (IOException e)
                 {
@@ -75,11 +78,11 @@ public class Exporter
         }
         if(npcId < 0)
         {
-            OBJExporter.export(model, path + "player-" + animationId + "-" + frame);
+            export(model, path , "player-" + animationId + "-" + frame, true);
         }
         else
         {
-            OBJExporter.export(model, path + npcId + "-" + animationId + "-" + frame);
+            export(model, path , npcId + "-" + animationId + "-" + frame, true);
         }
     }
 }
