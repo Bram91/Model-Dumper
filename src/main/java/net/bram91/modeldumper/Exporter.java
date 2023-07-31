@@ -65,7 +65,7 @@ public class Exporter
         }
     }
 
-    public static void exportSequence(Model model, int id, int frame, Date dateTime)
+    public static void exportSequence(Model model, int npcId, int animationId, int frame, Date dateTime)
     {
         String path = PATH + "sequences//" + TIME_FORMAT.format(dateTime) + "//";
         File folder = new File(path);
@@ -73,6 +73,13 @@ public class Exporter
         {
             folder.mkdirs();
         }
-        OBJExporter.export(model, path + id + "-" + frame);
+        if(npcId < 0)
+        {
+            OBJExporter.export(model, path + "player-" + animationId + "-" + frame);
+        }
+        else
+        {
+            OBJExporter.export(model, path + npcId + "-" + animationId + "-" + frame);
+        }
     }
 }

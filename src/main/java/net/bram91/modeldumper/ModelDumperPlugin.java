@@ -99,15 +99,6 @@ public class ModelDumperPlugin extends Plugin
 
 	private final Table<WorldPoint, Integer, GroundItem> groundItems = HashBasedTable.create();
 
-	private int getAnimationDuration(int id)
-	{
-		Animation animation = client.loadAnimation(config.animationId());
-		if(animation != null) {
-			return animation.getNumFrames();
-		}
-		return -1;
-	}
-
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -197,17 +188,18 @@ public class ModelDumperPlugin extends Plugin
 		if(config.transmogEnabled() && config.frame() != 0)
 		{
 			Player player = client.getLocalPlayer();
-			if(player != null)
+			Animation animation = client.loadAnimation(config.animationId());
+			if(player != null && animation != null)
 			{
-				if(config.frame() < getAnimationDuration(config.animationId()))
+				if(config.frame() < animation.getNumFrames())
 				{
 					player.setAnimationFrame(config.frame());
 					player.setPoseAnimationFrame(config.frame());
 				}
 				else
 				{
-					player.setAnimationFrame(getAnimationDuration(config.animationId()) - 1);
-					player.setPoseAnimationFrame(getAnimationDuration(config.animationId()) - 1);
+					player.setAnimationFrame(animation.getNumFrames() - 1);
+					player.setPoseAnimationFrame(animation.getNumFrames() - 1);
 				}
 			}
 		}
@@ -274,13 +266,17 @@ public class ModelDumperPlugin extends Plugin
 		Player localPlayer = client.getLocalPlayer();
 
 		Date dateTime = new Date();
-		for(int i = 0; i < getAnimationDuration(config.animationId()); i++)
+		Animation animation = client.loadAnimation(config.animationId());
+		if(animation != null)
 		{
-			if(client.loadAnimation(config.animationId())!=null)
+			for (int i = 0; i < animation.getNumFrames(); i++)
 			{
-				localPlayer.setAnimation(config.animationId());
-				localPlayer.setAnimationFrame(i);
-				Exporter.exportSequence(localPlayer.getModel(), config.animationId(), i, dateTime);
+				if (client.loadAnimation(config.animationId()) != null)
+				{
+					localPlayer.setAnimation(config.animationId());
+					localPlayer.setAnimationFrame(i);
+					Exporter.exportSequence(localPlayer.getModel(), config.npcId(), config.animationId(), i, dateTime);
+				}
 			}
 		}
 	}
