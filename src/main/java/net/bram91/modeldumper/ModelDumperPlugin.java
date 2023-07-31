@@ -31,16 +31,13 @@ import com.google.common.collect.Table;
 import com.google.inject.Provides;
 
 import java.awt.Shape;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
-import jdk.internal.org.jline.utils.Log;
 import net.runelite.api.*;
-import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.WidgetInfo;
@@ -53,7 +50,6 @@ import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
-import org.graalvm.compiler.hotspot.stubs.OutOfBoundsExceptionStub;
 
 @PluginDescriptor(
 	name = "Model Exporter",
@@ -103,36 +99,11 @@ public class ModelDumperPlugin extends Plugin
 
 	private final Table<WorldPoint, Integer, GroundItem> groundItems = HashBasedTable.create();
 
-	private Boolean ranOnce = false;
-	private Class<?> animation;
-	private Field var1;
 	private int getAnimationDuration(int id)
 	{
-		if(!ranOnce)
-		{
-			ranOnce = true;
-			ClassLoader classLoader = client.getClass().getClassLoader();
-
-			try {
-				animation = classLoader.loadClass("hy");//Animation
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-			try {
-				var1 = animation.getDeclaredField("ar");//animation frame ids
-			} catch (NoSuchFieldException e) {
-				throw new RuntimeException(e);
-			}
-			var1.setAccessible(true);
-		}
-		try {
-			Animation animation = client.loadAnimation(config.animationId());
-			if(animation != null) {
-				int[] animationArray = ((int[]) var1.get(animation));
-				return animationArray.length;
-			}
-		} catch (IllegalAccessException e) {
-
+		Animation animation = client.loadAnimation(config.animationId());
+		if(animation != null) {
+			return animation.getNumFrames();
 		}
 		return -1;
 	}
@@ -140,6 +111,8 @@ public class ModelDumperPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		ClassLoader classLoader = client.getClass().getClassLoader();
+
 		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
 		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
 		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT,this::exportLocalPlayerModel);
