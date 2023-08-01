@@ -59,7 +59,7 @@ public class OBJExporter
         if(seq)
         {
             mtlName = name.split("-")[0]+"-"+name.split("-")[1];
-            if(!name.split("-")[2].equals("0"))
+            if(!name.split("-")[2].equals("0") && !ModelDumperPlugin.getConfig().writeMaterialData())
             {
                 shouldWriteMaterials = false;
             }

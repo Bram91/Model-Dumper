@@ -78,6 +78,15 @@ public interface ModelDumperPluginConfig extends Config
 	default ExportFormat exportFormat() { return ExportFormat.OBJ; }
 
 	@ConfigItem(
+			keyName = "writeMaterialData",
+			name = "Store OBJ material data for all frames",
+			description = "Store material data for each individual frame on sequence exporting, for sequence importing into eg blender, it is recommended to turn this off",
+			position = 4,
+			section = exporterSection
+	)
+	default boolean writeMaterialData() { return false; }
+
+	@ConfigItem(
 			keyName = "transmogEnabled",
 			name = "Enabled",
 			description = "Possibility to transmog into a NPC to make export easier",
