@@ -55,16 +55,22 @@ public class OBJExporter
             return;
 
         String mtlName = name;
+        boolean shouldWriteMaterials = true;
         if(seq)
         {
             mtlName = name.split("-")[0]+"-"+name.split("-")[1];
+            if(!name.split("-")[2].equals("0"))
+            {
+                shouldWriteMaterials = false;
+            }
         }
 
         // Open writers
         PrintWriter obj = new PrintWriter(path+ name + ".obj");
         PrintWriter mtl = new PrintWriter(path + mtlName + ".mtl");
         obj.println("# Made by RuneLite Model-Dumper Plugin");
-        obj.println("mtllib " + mtlName + ".mtl");
+        if(shouldWriteMaterials)
+            obj.println("mtllib " + mtlName + ".mtl");
         obj.println("o " + name);
 
         // Write vertices
@@ -119,19 +125,20 @@ public class OBJExporter
                 mtl.printf("Kd %.4f %.4f %.4f\n", r, g, b);
             }
 
-            // only write usemtl if the mtl has changed
-            if (prevMtlIndex != ci)
-            {
-                obj.println("usemtl c" + ci);
+            if(shouldWriteMaterials) {
+                // only write usemtl if the mtl has changed
+                if (prevMtlIndex != ci) {
+                    obj.println("usemtl c" + ci);
+                }
+
+                // OBJ vertices are indexed by 1
+                int vi1 = m.getFaceIndices1()[fi] + 1;
+                int vi2 = m.getFaceIndices2()[fi] + 1;
+                int vi3 = m.getFaceIndices3()[fi] + 1;
+                obj.println("f " + vi1 + " " + vi2 + " " + vi3);
+
+                prevMtlIndex = ci;
             }
-
-            // OBJ vertices are indexed by 1
-            int vi1 = m.getFaceIndices1()[fi] + 1;
-            int vi2 = m.getFaceIndices2()[fi] + 1;
-            int vi3 = m.getFaceIndices3()[fi] + 1;
-            obj.println("f " + vi1 + " " + vi2 + " " + vi3);
-
-            prevMtlIndex = ci;
         }
 
         // flush output buffers
