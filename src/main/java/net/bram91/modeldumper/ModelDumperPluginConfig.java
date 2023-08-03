@@ -88,9 +88,16 @@ public interface ModelDumperPluginConfig extends Config
 
 	@ConfigItem(
 			keyName = "transmogEnabled",
+			name = "",
+			description = "",
+			hidden = true
+	)
+	void setTransmog(boolean val);
+	@ConfigItem(
+			keyName = "transmogEnabled",
 			name = "Enabled",
 			description = "Possibility to transmog into a NPC to make export easier",
-			position = 0,
+			position = 1,
 			section = transmogSection
 	)
 	default boolean transmogEnabled() {
@@ -101,7 +108,7 @@ public interface ModelDumperPluginConfig extends Config
 			keyName = "npcId",
 			name = "NPC ID",
 			description = "NPC ID to transmog into",
-			position = 1,
+			position = 2,
 			section = transmogSection
 	)
 	@Range(min=-1)
@@ -110,10 +117,18 @@ public interface ModelDumperPluginConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "npcId",
+			name = "",
+			description = "",
+			hidden = true
+	)
+	void setNpcId(int val);
+
+	@ConfigItem(
 			keyName = "animationId",
 			name = "Animation ID",
 			description = "Animation to perform. Use 0 to disable",
-			position = 2,
+			position = 3,
 			section = transmogSection
 	)
 	default int animationId() {
@@ -121,13 +136,40 @@ public interface ModelDumperPluginConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "animationId",
+			name = "",
+			description = "",
+			hidden = true
+	)
+	void setAnimationId(int val);
+
+	@ConfigItem(
 			keyName = "frame",
 			name = "Frame",
 			description = "Specific frame for the animation. Note: it will flicker a bit, but still easier to export a certain frame. Use 0 to disable",
-			position = 3,
+			position = 4,
 			section = transmogSection
 	)
 	default int frame() {
 		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "frame",
+			name = "",
+			description = "",
+			hidden = true
+	)
+	void setFrame(int val);
+
+	@ConfigItem(
+			keyName = "sidepanelEnabled",
+			name = "Sidepanel",
+			description = "Allows you to search for npcs and animations",
+			position = 0,
+			section = transmogSection
+	)
+	default boolean sidepanelEnabled() {
+		return false;
 	}
 }

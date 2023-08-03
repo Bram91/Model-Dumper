@@ -31,6 +31,7 @@ import com.google.common.collect.Table;
 import com.google.inject.Provides;
 
 import java.awt.Shape;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -40,6 +41,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+import lombok.Getter;
+import net.bram91.modeldumper.types.ModelExporterData;
+import net.runelite.client.ui.ClientToolbar;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
@@ -52,6 +56,8 @@ import net.runelite.client.menus.MenuManager;
 import net.runelite.client.menus.WidgetMenuOption;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 
 @PluginDescriptor(
@@ -61,6 +67,7 @@ import net.runelite.client.util.Text;
 )
 public class ModelDumperPlugin extends Plugin
 {
+	@Getter
 	private static ModelDumperPlugin instance;
 	private static final String EXPORT_MODEL = "Export Model";
 	private static final String EXPORT_SEQUENCE = "Export Animation Sequence";
@@ -81,6 +88,14 @@ public class ModelDumperPlugin extends Plugin
 	private final ImmutableList<String> set = ImmutableList.of(
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
+
+	@Inject
+	private ModelExporterData modelData;
+
+	@Inject
+	private ClientToolbar clientToolbar;
+
+	private NavigationButton navButton;
 
 	@Inject
 	private Client client;
@@ -105,6 +120,11 @@ public class ModelDumperPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		// We never want to start the plugin with the transmog enabled, since this is more of a config "button"
+		// So we make sure its always set to false on startup
+		if(config.transmogEnabled()) {
+			config.setTransmog(false);
+		}
 		menuManager.addManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
 		menuManager.addManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT,this::exportLocalPlayerModel);
 		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT,this::exportLocalPlayerModel);
@@ -114,8 +134,29 @@ public class ModelDumperPlugin extends Plugin
 		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT_SEQ,this::exportLocalPlayerSequence);
 
 		ModelDumperPlugin.instance = this;
-	}
 
+		if(config.sidepanelEnabled())
+		{
+			addSidepanel();
+		}
+	}
+	public void addSidepanel()
+	{
+		ModelPanel panel = injector.getInstance(ModelPanel.class);
+		panel.init(modelData);
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "icon.png");
+		navButton = NavigationButton.builder()
+				.tooltip("Model Exporter")
+				.icon(icon)
+				.priority(10)
+				.panel(panel)
+				.build();
+		clientToolbar.addNavigation(navButton);
+	}
+	public void removeSidepanel()
+	{
+		clientToolbar.removeNavigation(navButton);
+	}
 	@Override
 	protected void shutDown()
 	{
@@ -126,7 +167,10 @@ public class ModelDumperPlugin extends Plugin
 		menuManager.removeManagedCustomMenu(FIXED_EQUIPMENT_TAB_EXPORT_SEQ);
 		menuManager.removeManagedCustomMenu(RESIZABLE_EQUIPMENT_TAB_EXPORT_SEQ);
 		menuManager.removeManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT_SEQ);
-
+		if(config.sidepanelEnabled())
+		{
+			removeSidepanel();
+		}
 		groundItems.clear();
 	}
 
@@ -210,6 +254,19 @@ public class ModelDumperPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged)
 	{
+		if(!configChanged.getGroup().equals("modeldumper"))
+		{
+			return;
+		}
+		if(configChanged.getKey().equals("sidepanelEnabled"))
+		{
+			if (Boolean.parseBoolean((configChanged.getNewValue()))) {
+				addSidepanel();
+			} else {
+				removeSidepanel();
+			}
+			return;
+		}
 		Player player = client.getLocalPlayer();
 		if(player != null)
 		{
@@ -250,7 +307,7 @@ public class ModelDumperPlugin extends Plugin
 		}
 	}
 
-	private void exportLocalPlayerModel(MenuEntry entry)
+	public void exportLocalPlayerModel(MenuEntry entry)
 	{
 		Player localPlayer = client.getLocalPlayer();
 		if (config.forceRestPose())
@@ -261,7 +318,7 @@ public class ModelDumperPlugin extends Plugin
 		Exporter.export(localPlayer.getModel(), "Player " + client.getLocalPlayer().getName(), false);
 	}
 
-	private void exportLocalPlayerSequence(MenuEntry entry) {
+	public void exportLocalPlayerSequence(MenuEntry entry) {
 		Player localPlayer = client.getLocalPlayer();
 
 		Date dateTime = new Date();
@@ -278,6 +335,7 @@ public class ModelDumperPlugin extends Plugin
 				}
 			}
 		}
+		localPlayer.setAnimationFrame(0);
 	}
 
 	private void exportObjectModel(MenuEntry entry)
