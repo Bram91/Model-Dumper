@@ -35,3 +35,8 @@ The `Export Sequence` button exports the full currently selected animation.
 The `Reset` button resets the local player model back to the defaults with a static pose, equipping/equipping gear will reset this pose back to normal.
 
 The `Open Folder` button will open the `.runelite/models` directory in your file explorer.
+
+
+## Experimental features
+
+`Color Match % (OBJ)` Will allow you to group up colors that are similar, this will result heavily reduced material counts at the cost of color accuracy. 

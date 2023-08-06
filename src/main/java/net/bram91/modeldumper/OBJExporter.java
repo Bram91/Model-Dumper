@@ -109,6 +109,15 @@ public class OBJExporter
 
             // see if our color already has a mtl
             int ci = knownColors.indexOf(c);
+            if(seq) {
+                for (int i = 0; i < knownColors.size(); i++) {
+                    if (similarTo(c, knownColors.get(i), ModelDumperPlugin.getInstance().getConfig().getMaxDistance())) {
+                        ci = i;
+                        break;
+                    }
+                }
+            }
+
             if (ci == -1)
             {
                 // add to known colors
@@ -148,4 +157,13 @@ public class OBJExporter
         mtl.close();
     }
 
+    private static boolean similarTo(Color c1, Color c2, double maxDistance){
+        double distance = Math.sqrt((c1.getRed() - c2.getRed())*(c1.getRed() - c2.getRed()) + (c1.getGreen() - c2.getGreen())*(c1.getGreen() - c2.getGreen())+(c1.getBlue() - c2.getBlue())*(c1.getBlue() - c2.getBlue()));
+        double percentage = distance/Math.sqrt(65025 + 65025 + 65025)*100;
+        if(percentage < maxDistance){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

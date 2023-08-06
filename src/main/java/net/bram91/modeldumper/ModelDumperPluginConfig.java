@@ -24,11 +24,7 @@
  */
 package net.bram91.modeldumper;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.ConfigSection;
-import net.runelite.client.config.Range;
+import net.runelite.client.config.*;
 
 @ConfigGroup("modeldumper")
 public interface ModelDumperPluginConfig extends Config
@@ -46,6 +42,13 @@ public interface ModelDumperPluginConfig extends Config
 			position = 1
 	)
 	String transmogSection = "transmogSection";
+
+	@ConfigSection(
+			name = "Experimental",
+			description = "This can break stuff",
+			position = 2
+	)
+	String experimentalSection = "experimentalSection";
 
 	@ConfigItem(
 		keyName = "material",
@@ -172,4 +175,14 @@ public interface ModelDumperPluginConfig extends Config
 	default boolean sidepanelEnabled() {
 		return false;
 	}
+
+	@ConfigItem(
+			keyName = "maxDistance",
+			name = "Color match % (OBJ)",
+			description = "Will group up colors that are similar, low is better for color accuracy.",
+			position = 0,
+			section = experimentalSection
+	)
+	@Range(max = 100)
+	default double getMaxDistance() { return 0.0;}
 }
