@@ -55,11 +55,11 @@ public class OBJExporter
             return;
 
         String mtlName = name;
-        boolean shouldWriteMaterials = true;
+        boolean shouldWriteMaterials = ModelDumperPlugin.getConfig().material();
         if(seq)
         {
             mtlName = name.split("-")[0]+"-"+name.split("-")[1];
-            if(!name.split("-")[2].equals("0") && !ModelDumperPlugin.getConfig().writeMaterialData())
+            if(!name.split("-")[2].equals("0") && seq && !ModelDumperPlugin.getConfig().writeMaterialData())
             {
                 shouldWriteMaterials = false;
             }
@@ -67,10 +67,13 @@ public class OBJExporter
 
         // Open writers
         PrintWriter obj = new PrintWriter(path+ name + ".obj");
-        PrintWriter mtl = new PrintWriter(path + mtlName + ".mtl");
+        PrintWriter mtl = null;
         obj.println("# Made by RuneLite Model-Dumper Plugin");
         if(shouldWriteMaterials)
+        {
+            mtl = new PrintWriter(path + mtlName + ".mtl");
             obj.println("mtllib " + mtlName + ".mtl");
+        }
         obj.println("o " + name);
 
         // Write vertices
@@ -118,7 +121,7 @@ public class OBJExporter
                 }
             }
 
-            if (ci == -1)
+            if (ci == -1 && shouldWriteMaterials)
             {
                 // add to known colors
                 ci = knownColors.size();
@@ -134,27 +137,30 @@ public class OBJExporter
                 mtl.printf("Kd %.4f %.4f %.4f\n", r, g, b);
             }
 
-            if(shouldWriteMaterials) {
-                // only write usemtl if the mtl has changed
-                if (prevMtlIndex != ci) {
-                    obj.println("usemtl c" + ci);
-                }
 
-                // OBJ vertices are indexed by 1
-                int vi1 = m.getFaceIndices1()[fi] + 1;
-                int vi2 = m.getFaceIndices2()[fi] + 1;
-                int vi3 = m.getFaceIndices3()[fi] + 1;
-                obj.println("f " + vi1 + " " + vi2 + " " + vi3);
-
-                prevMtlIndex = ci;
+            // only write usemtl if the mtl has changed
+            if (shouldWriteMaterials && prevMtlIndex != ci)
+            {
+                obj.println("usemtl c" + ci);
             }
+
+            // OBJ vertices are indexed by 1
+            int vi1 = m.getFaceIndices1()[fi] + 1;
+            int vi2 = m.getFaceIndices2()[fi] + 1;
+            int vi3 = m.getFaceIndices3()[fi] + 1;
+            obj.println("f " + vi1 + " " + vi2 + " " + vi3);
+
+            prevMtlIndex = ci;
+
         }
 
         // flush output buffers
         obj.flush();
-        mtl.flush();
         obj.close();
-        mtl.close();
+        if(shouldWriteMaterials) {
+            mtl.flush();
+            mtl.close();
+        }
     }
 
     private static boolean similarTo(Color c1, Color c2, double maxDistance){
