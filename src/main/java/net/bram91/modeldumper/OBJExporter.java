@@ -109,7 +109,7 @@ public class OBJExporter
 
             // see if our color already has a mtl
             int ci = knownColors.indexOf(c);
-            if(seq) {
+            if(shouldWriteMaterials) {
                 for (int i = 0; i < knownColors.size(); i++) {
                     if (similarTo(c, knownColors.get(i), ModelDumperPlugin.getInstance().getConfig().getMaxDistance())) {
                         ci = i;
