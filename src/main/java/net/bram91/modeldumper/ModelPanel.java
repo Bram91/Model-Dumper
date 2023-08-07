@@ -71,7 +71,7 @@ ClientThread clientThread;
                 anim.setName(name);
             });
         }
-        modelExporterData.getNpcData().add(new NPCData(" Player",-1,-1,-1));
+        modelExporterData.getNpcData().add(new NPCData(" Player",-1,808,637));
         Object[] npcData = Arrays.stream(modelExporterData.getNpcData().toArray()).sorted().toArray();
         npcData = Arrays.stream(npcData).filter(x-> !StringUtils.isBlank(x.toString()) && !x.toString().equals("null")).toArray();
 
@@ -231,7 +231,11 @@ ClientThread clientThread;
             }
             else if (anim.getAnimationGroup().contains(new Animation(data.getStandingAnimation())) || anim.getAnimationGroup().contains(new Animation(data.getWalkingAnimation()))) {
                 matchingAnimations.addAll(anim.getAnimationGroup());
-                break;
+                //unless this is for player animations only 1 group can match, so we break after finding it.
+                if(data.getId()!=-1)
+                {
+                    break;
+                }
             }
         }
 
