@@ -266,7 +266,7 @@ ClientThread clientThread;
     private void applyAnimation(int id, int animation)
     {
         clientThread.invoke(() -> {
-            if (client.getGameState() == GameState.LOGGED_IN) {
+            if (client.getGameState() == GameState.LOGGED_IN && client.getLocalPlayer() != null) {
                 Player player = client.getLocalPlayer();
                 player.getPlayerComposition().setTransformedNpcId(id);
                 player.setIdlePoseAnimation(animation);
