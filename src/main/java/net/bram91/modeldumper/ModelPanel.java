@@ -47,10 +47,14 @@ public class ModelPanel extends PluginPanel {
 
     public void init(ModelExporterData modelExporterData) {
         if (modelExporterData.getNpcData() == null || modelExporterData.getAnimationGroup() == null) {
-            JTextArea errorDescription = new JTextArea("There was a problem loading npc information, you can still transmog in the plugin config.");
+            JTextArea errorDescription = new JTextArea("There was a problem loading npc information. " +
+                                                        "You can still transmog in the plugin config, " +
+                                                        "but searching through npc names/animations is not available.");
+
             errorDescription.setLineWrap(true);
             errorDescription.setWrapStyleWord(true);
             add(errorDescription);
+            add(new JButton("Open Folder"){{addActionListener(e -> LinkBrowser.open(MODEL_DIR.toString()));}});
             return;
         }
         Object[] animationGroups = modelExporterData.getAnimationGroup().toArray();
