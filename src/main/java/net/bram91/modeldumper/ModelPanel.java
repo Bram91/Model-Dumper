@@ -1,7 +1,7 @@
 package net.bram91.modeldumper;
 
 import com.google.inject.Inject;
-import jdk.internal.org.jline.utils.Log;
+import lombok.extern.slf4j.Slf4j;
 import net.bram91.modeldumper.types.*;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
@@ -24,12 +24,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 import static net.runelite.client.RuneLite.RUNELITE_DIR;
-
+@Slf4j
 public class ModelPanel extends PluginPanel {
     @Inject
     Client client;
@@ -173,7 +172,7 @@ public class ModelPanel extends PluginPanel {
             try {
                 new DataFetcher().saveAnimationNames(animationGroups);
             } catch (FileNotFoundException ex) {
-                Log.warn("Failed to write animation names to file.");
+                log.warn("Failed to write animation names to file.");
             }
         });
         openButton.addActionListener(e -> LinkBrowser.open(MODEL_DIR.toString()));

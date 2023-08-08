@@ -2,7 +2,7 @@ package net.bram91.modeldumper.types;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import jdk.internal.org.jline.utils.Log;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.http.api.RuneLiteAPI;
 
 import java.io.*;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import static net.runelite.client.RuneLite.RUNELITE_DIR;
-
+@Slf4j
 public class DataFetcher {
 
     private static final Gson gson = RuneLiteAPI.GSON.newBuilder().create();
@@ -69,7 +69,7 @@ public class DataFetcher {
         } catch (IOException e) {
 
         } catch (ArrayIndexOutOfBoundsException e) {
-            Log.warn("Invalid line in models/animationNames.txt");
+            log.warn("Invalid line in models/animationNames.txt");
         }
         return animationNames;
     }
