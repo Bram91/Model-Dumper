@@ -15,7 +15,6 @@ public class ModelExporterData {
     private Set<NPCData> animationGroup;
     private HashMap<Integer, String> animationNames;
 
-    @Inject
     public ModelExporterData() {
         try {
             this.npcData = new DataFetcher().getNPCData();

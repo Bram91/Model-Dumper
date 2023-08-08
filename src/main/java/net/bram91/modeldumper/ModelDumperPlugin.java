@@ -89,7 +89,6 @@ public class ModelDumperPlugin extends Plugin
 		"Trade with", "Attack", "Talk-to", "Examine"
 	);
 
-	@Inject
 	private ModelExporterData modelData;
 
 	@Inject
@@ -134,6 +133,8 @@ public class ModelDumperPlugin extends Plugin
 		menuManager.addManagedCustomMenu(RESIZABLE_VIEWPORT_BOTTOM_LINE_INVENTORY_TAB_EXPORT_SEQ,this::exportLocalPlayerSequence);
 
 		ModelDumperPlugin.instance = this;
+
+		modelData = new ModelExporterData();
 
 		if(config.sidepanelEnabled())
 		{
