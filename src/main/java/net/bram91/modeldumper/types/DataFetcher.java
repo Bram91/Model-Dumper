@@ -16,47 +16,43 @@ import static net.runelite.client.RuneLite.RUNELITE_DIR;
 public class DataFetcher {
 
     private static final Gson gson = RuneLiteAPI.GSON.newBuilder().create();
-    private String getRemoteJson(String path) throws IOException
-    {
+
+    private String getRemoteJson(String path) throws IOException {
         String url = "https://bram91.github.io/" + path;
-        if(System.getProperty("devmode")!=null)
-        {
+        if (System.getProperty("devmode") != null) {
             url = "http://localhost/" + path;
         }
 
-        try (InputStream inputStream = new URL(url).openStream())
-        {
+        try (InputStream inputStream = new URL(url).openStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             return readAll(reader);
         }
     }
-    private static String readAll(Reader rd) throws IOException
-    {
+
+    private static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
-        while ((cp = rd.read()) != -1)
-        {
+        while ((cp = rd.read()) != -1) {
             sb.append((char) cp);
         }
         return sb.toString();
     }
 
-    public Set<NPCData> getNPCData() throws IOException
-    {
+    public Set<NPCData> getNPCData() throws IOException {
         String data = getRemoteJson("data.json");
 
-        return gson.fromJson(data, new TypeToken<Set<NPCData>>(){}.getType());
+        return gson.fromJson(data, new TypeToken<Set<NPCData>>() {
+        }.getType());
     }
 
-    public Set<NPCData> getAnimationGroups() throws IOException
-    {
+    public Set<NPCData> getAnimationGroups() throws IOException {
         String data = getRemoteJson("animationgroups.json");
-        return gson.fromJson(data, new TypeToken<Set<AnimationGroup>>(){}.getType());
+        return gson.fromJson(data, new TypeToken<Set<AnimationGroup>>() {
+        }.getType());
     }
 
-    public HashMap<Integer,String> getAnimationNames()
-    {
-        HashMap<Integer,String> animationNames = new HashMap<>();
+    public HashMap<Integer, String> getAnimationNames() {
+        HashMap<Integer, String> animationNames = new HashMap<>();
         File MODEL_DIR = new File(RUNELITE_DIR, "models/animationNames.txt");
         BufferedReader reader;
         try {
@@ -65,15 +61,14 @@ public class DataFetcher {
 
             while (line != null) {
                 String[] lineData = line.split("=");
-                animationNames.put(Integer.valueOf(lineData[0]),lineData[1]);
+                animationNames.put(Integer.valueOf(lineData[0]), lineData[1]);
                 line = reader.readLine();
             }
 
             reader.close();
         } catch (IOException e) {
 
-        }
-        catch(ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
             Log.warn("Invalid line in models/animationNames.txt");
         }
         return animationNames;

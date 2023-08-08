@@ -13,8 +13,7 @@ public class NPCData implements Comparable<NPCData> {
     private final int standingAnimation;
     private final int walkingAnimation;
 
-    public String toString()
-    {
+    public String toString() {
         return name;
     }
 

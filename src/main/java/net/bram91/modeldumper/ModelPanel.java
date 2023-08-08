@@ -30,11 +30,11 @@ import java.util.regex.PatternSyntaxException;
 
 import static net.runelite.client.RuneLite.RUNELITE_DIR;
 
-public class ModelPanel extends PluginPanel{
-@Inject
-Client client;
-@Inject
-ClientThread clientThread;
+public class ModelPanel extends PluginPanel {
+    @Inject
+    Client client;
+    @Inject
+    ClientThread clientThread;
     @Inject
     ModelDumperPluginConfig config;
     private JTable npcList;
@@ -46,8 +46,7 @@ ClientThread clientThread;
     public static final File MODEL_DIR = new File(RUNELITE_DIR, "models");
 
     public void init(ModelExporterData modelExporterData) {
-        if(modelExporterData.getNpcData() == null || modelExporterData.getAnimationGroup() == null)
-        {
+        if (modelExporterData.getNpcData() == null || modelExporterData.getAnimationGroup() == null) {
             JTextArea errorDescription = new JTextArea("There was a problem loading npc information, you can still transmog in the plugin config.");
             errorDescription.setLineWrap(true);
             errorDescription.setWrapStyleWord(true);
@@ -71,9 +70,9 @@ ClientThread clientThread;
                 anim.setName(name);
             });
         }
-        modelExporterData.getNpcData().add(new NPCData(" Player",-1,808,637));
+        modelExporterData.getNpcData().add(new NPCData(" Player", -1, 808, 637));
         Object[] npcData = Arrays.stream(modelExporterData.getNpcData().toArray()).sorted().toArray();
-        npcData = Arrays.stream(npcData).filter(x-> !StringUtils.isBlank(x.toString()) && !x.toString().equals("null")).toArray();
+        npcData = Arrays.stream(npcData).filter(x -> !StringUtils.isBlank(x.toString()) && !x.toString().equals("null")).toArray();
 
         AnimationTableModel model = new AnimationTableModel(npcData, "Name", modelExporterData.getAnimationNames());
         npcList = new JTable(model);
@@ -81,8 +80,7 @@ ClientThread clientThread;
         npcFilter.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if(npcFilter.getText().equals(npcFilterHint))
-                {
+                if (npcFilter.getText().equals(npcFilterHint)) {
                     npcFilter.setText("");
                 }
             }
@@ -90,8 +88,7 @@ ClientThread clientThread;
         animationFilter.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if(animationFilter.getText().equals(animationFilterHint))
-                {
+                if (animationFilter.getText().equals(animationFilterHint)) {
                     animationFilter.setText("");
                 }
             }
@@ -99,69 +96,54 @@ ClientThread clientThread;
         addSearchBox(npcList, npcFilter);
         KeyListener keyListener = new KeyListener() {
             @Override
-            public void keyTyped(KeyEvent e) {
-
-            }
+            public void keyTyped(KeyEvent e) {}
 
             @Override
-            public void keyPressed(KeyEvent e) {
-
-            }
+            public void keyPressed(KeyEvent e) {}
 
             @Override
             public void keyReleased(KeyEvent e) {
                 NPCData npcData = null;
                 Animation animation = null;
-                if(npcList.getSelectedRow()!=-1) {
+                if (npcList.getSelectedRow() != -1) {
                     npcData = (NPCData) npcList.getValueAt(npcList.getSelectedRow(), 0);
                 }
-                if(animationList.getSelectedRow()!=-1 && animationList.getValueAt(animationList.getSelectedRow(), 0) instanceof  Animation) {
+                if (animationList.getSelectedRow() != -1 && animationList.getValueAt(animationList.getSelectedRow(), 0) instanceof Animation) {
                     animation = (Animation) animationList.getValueAt(animationList.getSelectedRow(), 0);
                 }
-                if(npcData != null)
-                {
-                    if(animation != null)
-                    {
+                if (npcData != null) {
+                    if (animation != null) {
                         applyAnimation(npcData.getId(), animation.getId());
-                    }
-                    else
-                    {
+                    } else {
                         applyAnimation(npcData.getId(), npcData.getStandingAnimation());
                     }
                 }
             }
         };
         ListSelectionListener npcListListener = e -> {
-                if(npcList.getSelectedRow() == -1)
-                {
-                    return;
-                }
-                setSelection(animationGroups, freePick, modelExporterData);
+            if (npcList.getSelectedRow() == -1) {
+                return;
+            }
+            setSelection(animationGroups, freePick, modelExporterData);
         };
 
         MouseListener animationListListener = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int rowAtPoint = animationList.rowAtPoint(e.getPoint());
                 animationList.setRowSelectionInterval(rowAtPoint, rowAtPoint);
-                if(!(animationList.getValueAt(animationList.getSelectedRow(), 0) instanceof Animation))
-                {
+                if (!(animationList.getValueAt(animationList.getSelectedRow(), 0) instanceof Animation)) {
                     return;
                 }
                 Animation animation = (Animation) animationList.getValueAt(animationList.getSelectedRow(), 0);
-                if(e.getButton()==3)
-                {
-                    String m = JOptionPane.showInputDialog("Animation name for "+animation.getId(), animation.getName());
-                    if(m != null)
-                        if(m.equals(""))
-                        {
+                if (e.getButton() == 3) {
+                    String m = JOptionPane.showInputDialog("Animation name for " + animation.getId(), animation.getName());
+                    if (m != null)
+                        if (m.equals("")) {
                             ((Animation) animationList.getValueAt(animationList.getSelectedRow(), 0)).setName(null);
-                        }
-                        else
-                        {
+                        } else {
                             ((Animation) animationList.getValueAt(animationList.getSelectedRow(), 0)).setName(m);
                         }
-                }
-                else {
+                } else {
                     int npcId = ((NPCData) npcList.getValueAt(npcList.getSelectedRow(), 0)).getId();
                     applyAnimation(npcId, animation.getId());
                 }
@@ -176,21 +158,21 @@ ClientThread clientThread;
         JPanel exportPanel = new JPanel();
         exportPanel.setLayout(new GridLayout(2, 2, 3, 3));
         JButton configButton = new JButton("Set Config");
-        configButton.addActionListener(e-> setConfig());
+        configButton.addActionListener(e -> setConfig());
         JButton exportButton = new JButton("Export Sequence");
-        exportButton.addActionListener(e-> exportSequence());
+        exportButton.addActionListener(e -> exportSequence());
         JButton resetButton = new JButton("Reset");
-        resetButton.addActionListener(e-> applyAnimation(-1,-1));
+        resetButton.addActionListener(e -> applyAnimation(-1, -1));
         JButton openButton = new JButton("Open Folder");
         JButton saveButton = new JButton("Save Animation Names");
-        saveButton.addActionListener(e-> {
+        saveButton.addActionListener(e -> {
             try {
                 new DataFetcher().saveAnimationNames(animationGroups);
             } catch (FileNotFoundException ex) {
                 Log.warn("Failed to write animation names to file.");
             }
         });
-        openButton.addActionListener(e-> LinkBrowser.open(MODEL_DIR.toString()));
+        openButton.addActionListener(e -> LinkBrowser.open(MODEL_DIR.toString()));
         exportPanel.add(configButton);
         exportPanel.add(exportButton);
         exportPanel.add(resetButton);
@@ -216,55 +198,49 @@ ClientThread clientThread;
     }
 
     private void setSelection(Object[] animationGroups, JCheckBox freePick, ModelExporterData modelExporterData) {
-        if(npcList.getSelectedRow()==-1)
-        {
+        if (npcList.getSelectedRow() == -1) {
             return;
         }
-        NPCData data = (NPCData) npcList.getValueAt(npcList.getSelectedRow(),0);
+        NPCData data = (NPCData) npcList.getValueAt(npcList.getSelectedRow(), 0);
         List<Animation> matchingAnimations = new ArrayList<>();
         matchingAnimations.add(new Animation(-1));
         for (Object animationGroup : animationGroups) {
             AnimationGroup anim = (AnimationGroup) animationGroup;
-            if(freePick.isSelected())
-            {
+            if (freePick.isSelected()) {
                 matchingAnimations.addAll(((AnimationGroup) animationGroup).getAnimationGroup());
-            }
-            else if (anim.getAnimationGroup().contains(new Animation(data.getStandingAnimation())) || anim.getAnimationGroup().contains(new Animation(data.getWalkingAnimation()))) {
+            } else if (anim.getAnimationGroup().contains(new Animation(data.getStandingAnimation())) || anim.getAnimationGroup().contains(new Animation(data.getWalkingAnimation()))) {
                 matchingAnimations.addAll(anim.getAnimationGroup());
                 //unless this is for player animations only 1 group can match, so we break after finding it.
-                if(data.getId()!=-1)
-                {
+                if (data.getId() != -1) {
                     break;
                 }
             }
         }
-
         animationList.setModel(new AnimationTableModel(matchingAnimations.stream().sorted().toArray(), "Animations", modelExporterData.getAnimationNames()));
-
         addSearchBox(animationList, animationFilter);
-        applyAnimation(data.getId(),data.getStandingAnimation());
+        applyAnimation(data.getId(), data.getStandingAnimation());
     }
 
     private boolean setConfig() {
-        if(npcList.getSelectedRow() == -1)
+        if (npcList.getSelectedRow() == -1)
             return false;
-        int npcId = ((NPCData) npcList.getValueAt(npcList.getSelectedRow(),0)).getId();
+        int npcId = ((NPCData) npcList.getValueAt(npcList.getSelectedRow(), 0)).getId();
         config.setFrame(0);
         config.setNpcId(npcId);
         config.setAnimationId(getAnimationID());
         return true;
     }
-    public int getAnimationID()
-    {
+
+    public int getAnimationID() {
         int animation;
-        if(animationList.getSelectedRow() != -1)
-            animation = ((Animation) animationList.getValueAt(animationList.getSelectedRow(),0)).getId();
+        if (animationList.getSelectedRow() != -1)
+            animation = ((Animation) animationList.getValueAt(animationList.getSelectedRow(), 0)).getId();
         else
-            animation = ((NPCData) npcList.getValueAt(npcList.getSelectedRow(),0)).getStandingAnimation();
+            animation = ((NPCData) npcList.getValueAt(npcList.getSelectedRow(), 0)).getStandingAnimation();
         return animation;
     }
-    private void applyAnimation(int id, int animation)
-    {
+
+    private void applyAnimation(int id, int animation) {
         clientThread.invoke(() -> {
             if (client.getGameState() == GameState.LOGGED_IN && client.getLocalPlayer() != null) {
                 Player player = client.getLocalPlayer();
@@ -273,34 +249,28 @@ ClientThread clientThread;
             }
         });
     }
-    private void exportSequence()
-    {
-        if(!setConfig())
+
+    private void exportSequence() {
+        if (!setConfig())
             return;
         int animation = getAnimationID();
-        clientThread.invoke(()->{
+        clientThread.invoke(() -> {
             if (client.getGameState() == GameState.LOGGED_IN && client.getLocalPlayer() != null) {
-                if(animation == -1)
-                {
-                    client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Exported a normal model since no animation was selected.","");
+                if (animation == -1) {
+                    client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Exported a normal model since no animation was selected.", "");
                     ModelDumperPlugin.getInstance().exportLocalPlayerModel(null);
-                }
-                else
-                {
-                    client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","Exported animation sequence","");
+                } else {
+                    client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Exported animation sequence", "");
                     ModelDumperPlugin.getInstance().exportLocalPlayerSequence(null);
                 }
             }
         });
     }
 
-    public void addSearchBox(JTable jTable, JTextField filter)
-    {
+    public void addSearchBox(JTable jTable, JTextField filter) {
         TableRowSorter<TableModel> rowSorter = new TableRowSorter<>(jTable.getModel());
         jTable.setRowSorter(rowSorter);
-
-        filter.getDocument().addDocumentListener(new DocumentListener(){
-
+        filter.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 String text = filter.getText();
@@ -309,10 +279,8 @@ ClientThread clientThread;
                     rowSorter.setRowFilter(null);
                 } else {
                     try {
-                        rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" +text));
-                    }
-                    catch(PatternSyntaxException ex)
-                    {
+                        rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                    } catch (PatternSyntaxException ex) {
                         rowSorter.setRowFilter(null);
                     }
                 }
@@ -325,12 +293,9 @@ ClientThread clientThread;
                 if (text.trim().isEmpty()) {
                     rowSorter.setRowFilter(null);
                 } else {
-                    try
-                    {
-                        rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" +text));
-                    }
-                    catch(PatternSyntaxException ex)
-                    {
+                    try {
+                        rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                    } catch (PatternSyntaxException ex) {
                         rowSorter.setRowFilter(null);
                     }
 
@@ -338,10 +303,7 @@ ClientThread clientThread;
             }
 
             @Override
-            public void changedUpdate(DocumentEvent e) {
-
-            }
-
+            public void changedUpdate(DocumentEvent e) {}
         });
     }
 }

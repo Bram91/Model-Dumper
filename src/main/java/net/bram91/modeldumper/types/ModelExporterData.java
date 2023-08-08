@@ -13,10 +13,10 @@ public class ModelExporterData {
     @Getter
     private Set<NPCData> npcData;
     private Set<NPCData> animationGroup;
-    private HashMap<Integer,String> animationNames;
+    private HashMap<Integer, String> animationNames;
 
     @Inject
-    public ModelExporterData(){
+    public ModelExporterData() {
         try {
             this.npcData = new DataFetcher().getNPCData();
             this.animationGroup = new DataFetcher().getAnimationGroups();
