@@ -515,7 +515,7 @@ public class ModelDumperPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick clientTick)
 	{
-		if (client.getGameState() == GameState.LOGGED_IN && !client.isMenuOpen() && client.isKeyPressed(KeyCode.KC_SHIFT))
+		if (client.getGameState() == GameState.LOGGED_IN && !client.isMenuOpen() && client.isKeyPressed(KeyCode.KC_SHIFT) && pets.size() < 20)
 		{
 			addMenus();
 		}
@@ -524,7 +524,6 @@ public class ModelDumperPlugin extends Plugin
 	private void addMenus()
 	{
 		Point mouseCanvasPosition = client.getMouseCanvasPosition();
-
 		List<NPC> petsUnderCursor = pets.stream().filter(p -> isClickable(p, mouseCanvasPosition)).collect(Collectors.toList());
 		if (!petsUnderCursor.isEmpty())
 		{
