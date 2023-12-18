@@ -158,4 +158,14 @@ public final class JagexColor
 			| ((int) (g * 256.0D) << 8)
 			| (int) (b * 256.0D);
 	}
+
+	public static int[] createPalette(double brightness)
+	{
+		int[] colorPalette = new int[65536];
+		for (int i = 0; i < colorPalette.length; i++)
+		{
+			colorPalette[i] = HSLtoRGB((short) i, brightness);
+		}
+		return colorPalette;
+	}
 }

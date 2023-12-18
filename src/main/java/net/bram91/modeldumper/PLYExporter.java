@@ -12,8 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static net.bram91.modeldumper.JagexColor.createPalette;
+
 public class PLYExporter
 {
+
+    private final static int[] colorPalette = createPalette(JagexColor.BRIGHTNESS_MIN);
 
     public static void export(Model m, String name) throws IOException
     {
@@ -36,10 +40,18 @@ public class PLYExporter
             }
             else
             {
-                // get average color of vertices
-                vc1 = new Color(JagexColor.HSLtoRGB((short) m.getFaceColors1()[fi], JagexColor.BRIGHTNESS_MIN));
-                vc2 = new Color(JagexColor.HSLtoRGB((short) m.getFaceColors2()[fi], JagexColor.BRIGHTNESS_MIN));
-                vc3 = new Color(JagexColor.HSLtoRGB((short) m.getFaceColors3()[fi], JagexColor.BRIGHTNESS_MIN));
+                if (m.getFaceColors3()[fi] == -1)
+                {
+                    // face should be shaded flat
+                    int colorIndex = m.getFaceColors1()[fi];
+                    int rgbColor = colorPalette[colorIndex];
+                    vc1 = vc2 = vc3 = new Color(rgbColor);
+                } else {
+                    // get color for each vertex
+                    vc1 = new Color(JagexColor.HSLtoRGB((short) m.getFaceColors1()[fi], JagexColor.BRIGHTNESS_MIN));
+                    vc2 = new Color(JagexColor.HSLtoRGB((short) m.getFaceColors2()[fi], JagexColor.BRIGHTNESS_MIN));
+                    vc3 = new Color(JagexColor.HSLtoRGB((short) m.getFaceColors3()[fi], JagexColor.BRIGHTNESS_MIN));
+                }
             }
 
             int vi1 = m.getFaceIndices1()[fi];
