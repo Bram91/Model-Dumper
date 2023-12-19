@@ -11,9 +11,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.bram91.modeldumper.JagexColor.createPalette;
+
 public class OBJExporter
 {
 
+    private final static int[] colorPalette = createPalette(JagexColor.BRIGHTNESS_MIN);
     private final static String PATH = RuneLite.RUNELITE_DIR + "//models//";
 
     public static void export(Renderable r, String name)
@@ -103,11 +106,20 @@ public class OBJExporter
             }
             else
             {
-                // get average color of vertices
-                int c1 = m.getFaceColors1()[fi];
-                int c2 = m.getFaceColors2()[fi];
-                int c3 = m.getFaceColors3()[fi];
-                c = JagexColor.HSLtoRGBAvg(c1, c2, c3);
+                if (m.getFaceColors3()[fi] == -1)
+                {
+                    // face should be shaded flat
+                    int colorIndex = m.getFaceColors1()[fi];
+                    int rgbColor = colorPalette[colorIndex];
+                    c = new Color(rgbColor);
+                } else {
+
+                    // get average color of vertices
+                    int c1 = m.getFaceColors1()[fi];
+                    int c2 = m.getFaceColors2()[fi];
+                    int c3 = m.getFaceColors3()[fi];
+                    c = JagexColor.HSLtoRGBAvg(c1, c2, c3);
+                }
             }
 
             // see if our color already has a mtl
