@@ -83,9 +83,9 @@ public class OBJExporter
         for (int vi=0; vi < m.getVerticesCount(); ++vi)
         {
             // Y and Z axes are flipped
-            int vx = m.getVerticesX()[vi];
-            int vy = -m.getVerticesY()[vi];
-            int vz = -m.getVerticesZ()[vi];
+            int vx = (int) m.getVerticesX()[vi];
+            int vy = (int) -m.getVerticesY()[vi];
+            int vz = (int) -m.getVerticesZ()[vi];
             obj.println("v " + vx + " " + vy + " " + vz);
         }
 

@@ -58,15 +58,15 @@ public class PLYExporter
             int vi2 = m.getFaceIndices2()[fi];
             int vi3 = m.getFaceIndices3()[fi];
 
-            int vx1 = m.getVerticesX()[vi1];
-            int vx2 = m.getVerticesX()[vi2];
-            int vx3 = m.getVerticesX()[vi3];
-            int vy1 = -m.getVerticesY()[vi1];
-            int vy2 = -m.getVerticesY()[vi2];
-            int vy3 = -m.getVerticesY()[vi3];
-            int vz1 = m.getVerticesZ()[vi1];
-            int vz2 = m.getVerticesZ()[vi2];
-            int vz3 = m.getVerticesZ()[vi3];
+            int vx1 = (int) m.getVerticesX()[vi1];
+            int vx2 = (int) m.getVerticesX()[vi2];
+            int vx3 = (int) m.getVerticesX()[vi3];
+            int vy1 = (int) -m.getVerticesY()[vi1];
+            int vy2 = (int) -m.getVerticesY()[vi2];
+            int vy3 = (int) -m.getVerticesY()[vi3];
+            int vz1 = (int) m.getVerticesZ()[vi1];
+            int vz2 = (int) m.getVerticesZ()[vi2];
+            int vz3 = (int) m.getVerticesZ()[vi3];
 
             vertices.add(new Vertex(vx1, vy1, vz1, vc1.getRed(), vc1.getGreen(), vc1.getBlue()));
             vertices.add(new Vertex(vx2, vy2, vz2, vc2.getRed(), vc2.getGreen(), vc2.getBlue()));
