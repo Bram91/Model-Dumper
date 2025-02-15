@@ -397,7 +397,7 @@ public class ModelDumperPlugin extends Plugin
 	{
 		String menuTarget = entry.getTarget();
 		int identifier = entry.getIdentifier();
-		NPC npc = client.getCachedNPCs()[identifier];
+		NPC npc = client.getTopLevelWorldView().npcs().byIndex(identifier);
 		Exporter.export(npc.getModel(), "NPC " + Text.removeFormattingTags(menuTarget), false);
 	}
 
