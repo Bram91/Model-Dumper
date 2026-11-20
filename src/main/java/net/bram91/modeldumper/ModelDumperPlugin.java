@@ -211,10 +211,13 @@ public class ModelDumperPlugin extends Plugin
 				else if(target.getType().equals(MenuAction.EXAMINE_ITEM_GROUND) || target.getType().equals(MenuAction.EXAMINE_OBJECT))
 				{
 					client.createMenuEntry(0)
-						.setOption(EXPORT_MODEL)
-						.setTarget(entityName)
-						.setIdentifier(target.getIdentifier())
-						.onClick(this::exportObjectModel);
+							.setOption(EXPORT_MODEL)
+							.setTarget(entityName)
+							.setIdentifier(target.getIdentifier())
+							.setParam0(target.getParam0())
+							.setParam1(target.getParam1())
+							.setWorldViewId(target.getWorldViewId())
+							.onClick(this::exportObjectModel);
 				}
 				else if(target.getNpc()!=null && !target.getNpc().getComposition().isFollower())
 				{
@@ -347,11 +350,13 @@ public class ModelDumperPlugin extends Plugin
 		Tile[][][] tiles = scene.getTiles();
 
 		int z = client.getPlane();
+
 		for (int x = 0; x < Constants.SCENE_SIZE; ++x)
 		{
 			for (int y = 0; y < Constants.SCENE_SIZE; ++y)
 			{
 				Tile tile = tiles[z][x][y];
+
 				if (tile != null)
 				{
 					GameObject[] gameObjects = tile.getGameObjects();
@@ -361,7 +366,6 @@ public class ModelDumperPlugin extends Plugin
 
 					if (wallObject != null && wallObject.getId() == id)
 					{
-
 						Exporter.export(wallObject.getRenderable1(), "Object " + Text.removeFormattingTags(menuTarget));
 						return;
 					}
@@ -372,17 +376,41 @@ public class ModelDumperPlugin extends Plugin
 					}
 					else
 					{
-						for (GameObject gameObject : gameObjects) {
-							if (gameObject != null && gameObject.getId() == id) {
-								if (gameObject.getRenderable() != null) {
+						for (GameObject gameObject : gameObjects)
+						{
+							if (gameObject != null && gameObject.getRenderable() != null)
+							{
+								ObjectComposition composition = client.getObjectDefinition(gameObject.getId());
+
+								int transformedId = gameObject.getId();
+
+								if (composition != null)
+								{
+									int[] impostorIds = composition.getImpostorIds();
+
+									if (impostorIds != null)
+									{
+										ObjectComposition impostor = composition.getImpostor();
+
+										if (impostor != null)
+										{
+											transformedId = impostor.getId();
+										}
+									}
+								}
+
+								if (gameObject.getId() == id || transformedId == id)
+								{
 									Exporter.export(gameObject.getRenderable(), "Object " + Text.removeFormattingTags(menuTarget));
 									return;
 								}
 							}
 						}
 
-						for (GroundItem groundItem : groundItemsOnTile) {
-							if (groundItem.getId() == id) {
+						for (GroundItem groundItem : groundItemsOnTile)
+						{
+							if (groundItem.getId() == id)
+							{
 								Exporter.export(groundItem.getModel(), "Item " + Text.removeFormattingTags(menuTarget), false);
 								return;
 							}
